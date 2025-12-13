@@ -23,6 +23,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ContactMailIcon from "@mui/icons-material/ContactMail";
 import CloseIcon from "@mui/icons-material/Close";
 import Link from "next/link";
 import { useGetWindowSize } from "../../hooks/useGetWindowSize";
@@ -62,6 +63,7 @@ const theme = createTheme({
 
 const navItems = [
   { label: "料金シミュレーション", href: "/", icon: <CalculateIcon /> },
+  { label: "お見積り・予約", href: "/contact", icon: <ContactMailIcon /> },
   { label: "よくある質問", href: "/faq", icon: <HelpIcon /> },
   { label: "導入事例", href: "/cases", icon: <PeopleIcon /> },
   { label: "活用ガイド", href: "/guide", icon: <MenuBookIcon /> },
@@ -209,6 +211,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             © 2024 選挙カーレンタルラボ All Rights Reserved.
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
+            <Link href="/contact" passHref style={{ textDecoration: "none" }}>
+              <Typography variant="caption" color="text.secondary" sx={{ "&:hover": { color: "primary.main" } }}>
+                お見積り・予約
+              </Typography>
+            </Link>
             <Link href="/faq" passHref style={{ textDecoration: "none" }}>
               <Typography variant="caption" color="text.secondary" sx={{ "&:hover": { color: "primary.main" } }}>
                 よくある質問
