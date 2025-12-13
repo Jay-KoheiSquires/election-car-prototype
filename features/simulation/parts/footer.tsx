@@ -91,7 +91,7 @@ const Footer = ({ sendData, calcData }: Props) => {
                     variant="contained"
                     startIcon={<SendIcon />}
                     onClick={() => {
-                      router.push("input");
+                      router.push("contact");
                     }}
                   >
                     お問合せ
