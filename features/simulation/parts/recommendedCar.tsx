@@ -122,13 +122,13 @@ const RecommendedCar: React.FC<RecommendedCarProps> = ({ electoralClass, onSelec
       <Typography variant="subtitle2" gutterBottom>
         「{electoralLabels[electoralClass]}」におすすめの車種
       </Typography>
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 1 }}>
+      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, mt: 1 }}>
         {recommendations.map((rec, idx) => (
           <Card
             key={idx}
             variant="outlined"
             sx={{
-              flex: "1 1 250px",
+              flex: { xs: "1 1 auto", sm: "1 1 0" },
               cursor: "pointer",
               transition: "all 0.2s",
               "&:hover": {
@@ -138,10 +138,10 @@ const RecommendedCar: React.FC<RecommendedCarProps> = ({ electoralClass, onSelec
             }}
             onClick={() => onSelect(rec.carClass, rec.carType)}
           >
-            <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
                 <DirectionsCarIcon fontSize="small" color="primary" />
-                <Typography variant="body2" fontWeight="bold">
+                <Typography variant="body2" fontWeight="bold" sx={{ fontSize: { xs: "0.875rem", sm: "0.875rem" } }}>
                   {rec.carName}
                 </Typography>
                 <Chip
@@ -149,18 +149,20 @@ const RecommendedCar: React.FC<RecommendedCarProps> = ({ electoralClass, onSelec
                   size="small"
                   color="primary"
                   variant="outlined"
+                  sx={{ height: 20, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
                 />
               </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, lineHeight: 1.4 }}>
                 {rec.reason}
               </Typography>
-              <Box sx={{ display: "flex", gap: 0.5 }}>
+              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 {rec.tags.map((tag, tagIdx) => (
                   <Chip
                     key={tagIdx}
                     label={tag}
                     size="small"
                     color={tagIdx === 0 ? "success" : "default"}
+                    sx={{ height: 22, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
                   />
                 ))}
               </Box>

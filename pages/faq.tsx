@@ -8,8 +8,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
-  Divider,
   Grid,
   Paper,
   TextField,
@@ -147,18 +145,18 @@ const FAQPage = () => {
 
   return (
     <Layout>
-      <Container maxWidth="md">
+      <Box>
         {/* ヘッダー */}
         <Box sx={{ mb: 3 }}>
           <Link href="/" passHref>
-            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }} size="small">
               シミュレーションに戻る
             </Button>
           </Link>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
             よくある質問（FAQ）
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             選挙カーレンタルに関するよくある質問をまとめました
           </Typography>
         </Box>
@@ -242,20 +240,21 @@ const FAQPage = () => {
 
         {/* お問い合わせ */}
         <Card sx={{ bgcolor: "primary.light", mb: 4 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
+          <CardContent sx={{ px: { xs: 2, sm: 3 } }}>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               お探しの回答が見つかりませんか？
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
               お気軽にお問い合わせください。専門スタッフが丁寧にお答えします。
             </Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={1.5}>
               <Grid item xs={12} sm={6}>
                 <Button
                   fullWidth
                   variant="contained"
                   startIcon={<LocalPhoneIcon />}
                   href="tel:03-1234-5678"
+                  size="small"
                 >
                   電話: 03-1234-5678
                 </Button>
@@ -267,6 +266,7 @@ const FAQPage = () => {
                   startIcon={<EmailIcon />}
                   href="mailto:info@senkyocar-labo.com"
                   sx={{ bgcolor: "white" }}
+                  size="small"
                 >
                   メールで問い合わせ
                 </Button>
@@ -274,7 +274,7 @@ const FAQPage = () => {
             </Grid>
           </CardContent>
         </Card>
-      </Container>
+      </Box>
     </Layout>
   );
 };

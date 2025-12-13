@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
   Grid,
   Rating,
   Tab,
@@ -151,60 +150,60 @@ const CasesPage = () => {
 
   return (
     <Layout>
-      <Container maxWidth="md">
+      <Box>
         {/* ヘッダー */}
         <Box sx={{ mb: 3 }}>
           <Link href="/" passHref>
-            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }} size="small">
               シミュレーションに戻る
             </Button>
           </Link>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
             導入事例・お客様の声
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             選挙カーをご利用いただいたお客様からの声をご紹介します
           </Typography>
         </Box>
 
         {/* 実績サマリー */}
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={1} sx={{ mb: 3 }}>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ textAlign: "center", py: 2 }}>
-              <Typography variant="h4" color="primary" fontWeight="bold">
+            <Card sx={{ textAlign: "center", py: 1.5 }}>
+              <Typography variant="h5" color="primary" fontWeight="bold" sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                 500+
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 累計利用件数
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ textAlign: "center", py: 2 }}>
-              <Typography variant="h4" color="primary" fontWeight="bold">
+            <Card sx={{ textAlign: "center", py: 1.5 }}>
+              <Typography variant="h5" color="primary" fontWeight="bold" sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                 47
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 対応都道府県
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ textAlign: "center", py: 2 }}>
-              <Typography variant="h4" color="primary" fontWeight="bold">
+            <Card sx={{ textAlign: "center", py: 1.5 }}>
+              <Typography variant="h5" color="primary" fontWeight="bold" sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                 98%
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 お客様満足度
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ textAlign: "center", py: 2 }}>
-              <Typography variant="h4" color="primary" fontWeight="bold">
+            <Card sx={{ textAlign: "center", py: 1.5 }}>
+              <Typography variant="h5" color="primary" fontWeight="bold" sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                 85%
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 リピート率
               </Typography>
             </Card>
@@ -227,60 +226,65 @@ const CasesPage = () => {
         </Tabs>
 
         {/* 事例一覧 */}
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {displayedCases.map((caseItem) => (
             <Grid item xs={12} key={caseItem.id}>
               <Card>
-                <CardContent>
-                  <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                    <Avatar sx={{ width: 56, height: 56, bgcolor: "primary.main" }}>
-                      {caseItem.name.charAt(0)}
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                        <Typography variant="h6">{caseItem.name}</Typography>
-                        <Chip
-                          label={caseItem.result}
-                          size="small"
-                          color={caseItem.result === "当選" ? "success" : "default"}
-                          icon={caseItem.result === "当選" ? <EmojiEventsIcon /> : undefined}
-                        />
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {caseItem.title} / {caseItem.area}
-                      </Typography>
-                      <Box sx={{ display: "flex", gap: 0.5, mt: 0.5 }}>
-                        <Chip label={caseItem.electionType} size="small" variant="outlined" />
-                        <Chip label={caseItem.carClass} size="small" variant="outlined" />
-                        <Chip label={caseItem.year} size="small" variant="outlined" />
+                <CardContent sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
+                  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, mb: 2 }}>
+                    <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                      <Avatar sx={{ width: { xs: 40, sm: 56 }, height: { xs: 40, sm: 56 }, bgcolor: "primary.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+                        {caseItem.name.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                          <Typography variant="subtitle1" fontWeight="bold">{caseItem.name}</Typography>
+                          <Chip
+                            label={caseItem.result}
+                            size="small"
+                            color={caseItem.result === "当選" ? "success" : "default"}
+                            icon={caseItem.result === "当選" ? <EmojiEventsIcon /> : undefined}
+                            sx={{ height: 22 }}
+                          />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {caseItem.title} / {caseItem.area}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
+                          <Chip label={caseItem.electionType} size="small" variant="outlined" sx={{ height: 20, "& .MuiChip-label": { px: 0.75, fontSize: "0.65rem" } }} />
+                          <Chip label={caseItem.carClass} size="small" variant="outlined" sx={{ height: 20, "& .MuiChip-label": { px: 0.75, fontSize: "0.65rem" } }} />
+                          <Chip label={caseItem.year} size="small" variant="outlined" sx={{ height: 20, "& .MuiChip-label": { px: 0.75, fontSize: "0.65rem" } }} />
+                        </Box>
                       </Box>
                     </Box>
-                    <Rating value={caseItem.rating} readOnly size="small" />
+                    <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                      <Rating value={caseItem.rating} readOnly size="small" />
+                    </Box>
                   </Box>
 
-                  <Box sx={{ bgcolor: "grey.50", p: 2, borderRadius: 1, mb: 2 }}>
-                    <FormatQuoteIcon color="primary" sx={{ transform: "rotate(180deg)", opacity: 0.3 }} />
-                    <Typography variant="body1" sx={{ fontStyle: "italic" }}>
+                  <Box sx={{ bgcolor: "grey.50", p: 1.5, borderRadius: 1, mb: 2 }}>
+                    <FormatQuoteIcon color="primary" sx={{ transform: "rotate(180deg)", opacity: 0.3, fontSize: 16 }} />
+                    <Typography variant="body2" sx={{ fontStyle: "italic" }}>
                       {caseItem.comment}
                     </Typography>
                     <Box sx={{ textAlign: "right" }}>
-                      <FormatQuoteIcon color="primary" sx={{ opacity: 0.3 }} />
+                      <FormatQuoteIcon color="primary" sx={{ opacity: 0.3, fontSize: 16 }} />
                     </Box>
                   </Box>
 
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography variant="caption" fontWeight="bold" gutterBottom sx={{ display: "block" }}>
                     ポイント
                   </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
                     {caseItem.points.map((point, idx) => (
-                      <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <CheckCircleIcon fontSize="small" color="success" />
-                        <Typography variant="body2">{point}</Typography>
+                      <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <CheckCircleIcon sx={{ fontSize: 14 }} color="success" />
+                        <Typography variant="caption">{point}</Typography>
                       </Box>
                     ))}
                   </Box>
 
-                  <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}>
+                  <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: "divider" }}>
                     <Typography variant="caption" color="text.secondary">
                       利用車両: {caseItem.carType}（{caseItem.carClass}）
                     </Typography>
@@ -292,22 +296,22 @@ const CasesPage = () => {
         </Grid>
 
         {/* CTA */}
-        <Card sx={{ mt: 4, mb: 4, bgcolor: "primary.light" }}>
-          <CardContent sx={{ textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
+        <Card sx={{ mt: 3, mb: 3, bgcolor: "primary.light" }}>
+          <CardContent sx={{ textAlign: "center", py: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               あなたの選挙活動も、私たちにお任せください
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
               まずは料金シミュレーションから
             </Typography>
             <Link href="/" passHref>
-              <Button variant="contained" size="large">
+              <Button variant="contained" size="medium">
                 料金シミュレーションへ
               </Button>
             </Link>
           </CardContent>
         </Card>
-      </Container>
+      </Box>
     </Layout>
   );
 };

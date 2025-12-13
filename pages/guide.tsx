@@ -6,8 +6,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
-  Divider,
   Grid,
   List,
   ListItem,
@@ -106,26 +104,26 @@ const GuidePage = () => {
 
   return (
     <Layout>
-      <Container maxWidth="md">
+      <Box>
         {/* ヘッダー */}
         <Box sx={{ mb: 3 }}>
           <Link href="/" passHref>
-            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} sx={{ mb: 2 }} size="small">
               シミュレーションに戻る
             </Button>
           </Link>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h5" component="h1" gutterBottom sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
             選挙カー活用ガイド
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             選挙カーを効果的に活用するためのノウハウをご紹介します
           </Typography>
         </Box>
 
         {/* レンタルの流れ */}
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <CheckCircleIcon color="primary" />
+        <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <CheckCircleIcon color="primary" fontSize="small" />
             レンタルの流れ
           </Typography>
           <Stepper orientation="vertical">
@@ -154,31 +152,31 @@ const GuidePage = () => {
         </Paper>
 
         {/* 効果的な使い方 */}
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <TipsAndUpdatesIcon color="primary" />
+        <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <TipsAndUpdatesIcon color="primary" fontSize="small" />
             効果的な選挙カーの使い方
           </Typography>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
             {effectiveTips.map((section, idx) => (
-              <Grid item xs={12} md={4} key={idx}>
+              <Grid item xs={12} sm={4} key={idx}>
                 <Card variant="outlined" sx={{ height: "100%" }}>
-                  <CardContent>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}>
                       {section.icon}
-                      <Typography variant="subtitle1" fontWeight="bold">
+                      <Typography variant="body2" fontWeight="bold">
                         {section.title}
                       </Typography>
                     </Box>
-                    <List dense>
+                    <List dense disablePadding>
                       {section.tips.map((tip, tipIdx) => (
-                        <ListItem key={tipIdx} disableGutters>
-                          <ListItemIcon sx={{ minWidth: 28 }}>
-                            <LightbulbIcon fontSize="small" color="warning" />
+                        <ListItem key={tipIdx} disableGutters sx={{ py: 0.25 }}>
+                          <ListItemIcon sx={{ minWidth: 20 }}>
+                            <LightbulbIcon sx={{ fontSize: 14 }} color="warning" />
                           </ListItemIcon>
                           <ListItemText
                             primary={tip}
-                            primaryTypographyProps={{ variant: "body2" }}
+                            primaryTypographyProps={{ variant: "caption" }}
                           />
                         </ListItem>
                       ))}
@@ -191,9 +189,9 @@ const GuidePage = () => {
         </Paper>
 
         {/* 車種選びのポイント */}
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <DirectionsCarIcon color="primary" />
+        <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <DirectionsCarIcon color="primary" fontSize="small" />
             車種選びのポイント
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -257,28 +255,28 @@ const GuidePage = () => {
         </Paper>
 
         {/* 注意事項 */}
-        <Alert severity="warning" sx={{ mb: 4 }} icon={<WarningIcon />}>
-          <Typography variant="subtitle2" gutterBottom>
+        <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
+          <Typography variant="caption" fontWeight="bold" gutterBottom sx={{ display: "block" }}>
             選挙カー利用時の注意事項
           </Typography>
-          <List dense>
-            <ListItem disableGutters>
-              <Typography variant="body2">
+          <List dense disablePadding>
+            <ListItem disableGutters sx={{ py: 0.25 }}>
+              <Typography variant="caption">
                 • 選挙運動は告示日から投票日前日まで。それ以外の期間は使用できません。
               </Typography>
             </ListItem>
-            <ListItem disableGutters>
-              <Typography variant="body2">
+            <ListItem disableGutters sx={{ py: 0.25 }}>
+              <Typography variant="caption">
                 • 音声による選挙運動は8:00〜20:00まで。時間外は禁止されています。
               </Typography>
             </ListItem>
-            <ListItem disableGutters>
-              <Typography variant="body2">
+            <ListItem disableGutters sx={{ py: 0.25 }}>
+              <Typography variant="caption">
                 • 学校・病院・診療所の周辺では静穏を保つよう努めてください。
               </Typography>
             </ListItem>
-            <ListItem disableGutters>
-              <Typography variant="body2">
+            <ListItem disableGutters sx={{ py: 0.25 }}>
+              <Typography variant="caption">
                 • 連呼行為は走行中または停車中に限られます（演説は連呼行為に含まれません）。
               </Typography>
             </ListItem>
@@ -286,22 +284,22 @@ const GuidePage = () => {
         </Alert>
 
         {/* CTA */}
-        <Card sx={{ bgcolor: "primary.light", mb: 4 }}>
-          <CardContent sx={{ textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
+        <Card sx={{ bgcolor: "primary.light", mb: 3 }}>
+          <CardContent sx={{ textAlign: "center", py: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               選挙カーの準備はお早めに
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
               特に統一地方選挙は早期に予約が埋まります。まずはシミュレーションから。
             </Typography>
             <Link href="/" passHref>
-              <Button variant="contained" size="large">
+              <Button variant="contained" size="medium">
                 料金シミュレーションへ
               </Button>
             </Link>
           </CardContent>
         </Card>
-      </Container>
+      </Box>
     </Layout>
   );
 };

@@ -141,6 +141,7 @@ https://senkyocar-labo.com/`;
                 startIcon={<LineIcon />}
                 onClick={contactViaLine}
                 size="small"
+                sx={{ fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 2 } }}
               >
                 LINEで相談
               </Button>
@@ -152,6 +153,7 @@ https://senkyocar-labo.com/`;
                 startIcon={<QrCodeIcon />}
                 onClick={() => setQrDialogOpen(true)}
                 size="small"
+                sx={{ fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 2 } }}
               >
                 QRコード
               </Button>
@@ -163,8 +165,9 @@ https://senkyocar-labo.com/`;
                 startIcon={<EmailIcon />}
                 onClick={() => setEmailDialogOpen(true)}
                 size="small"
+                sx={{ fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 2 } }}
               >
-                メール送信
+                メール
               </Button>
             </Grid>
             <Grid item xs={6} sm={3}>
@@ -174,6 +177,7 @@ https://senkyocar-labo.com/`;
                 startIcon={<ContentCopyIcon />}
                 onClick={copyToClipboard}
                 size="small"
+                sx={{ fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 2 } }}
               >
                 コピー
               </Button>
