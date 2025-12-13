@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Box, Typography, Chip, Paper, Grid, Button } from "@mui/material";
+import { Box, Typography, Paper, Grid, Button, Tabs, Tab } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import MapIcon from "@mui/icons-material/Map";
+import ListIcon from "@mui/icons-material/List";
 
 interface JapanMapProps {
   selectedPref: string;
@@ -70,7 +72,71 @@ const regions = [
   { name: "沖縄", color: "#009688", prefCodes: ["47"] },
 ];
 
+// 地図上の都道府県位置（グリッド座標）
+const mapPositions: { [key: string]: { row: number; col: number } } = {
+  // 北海道
+  "01": { row: 0, col: 9 },
+  // 東北
+  "02": { row: 2, col: 9 }, // 青森
+  "03": { row: 3, col: 9 }, // 岩手
+  "05": { row: 3, col: 8 }, // 秋田
+  "04": { row: 4, col: 9 }, // 宮城
+  "06": { row: 4, col: 8 }, // 山形
+  "07": { row: 5, col: 8 }, // 福島
+  // 関東
+  "08": { row: 5, col: 9 }, // 茨城
+  "09": { row: 6, col: 8 }, // 栃木
+  "10": { row: 6, col: 7 }, // 群馬
+  "11": { row: 7, col: 7 }, // 埼玉
+  "12": { row: 7, col: 9 }, // 千葉
+  "13": { row: 7, col: 8 }, // 東京
+  "14": { row: 8, col: 8 }, // 神奈川
+  // 中部
+  "15": { row: 4, col: 7 }, // 新潟
+  "16": { row: 5, col: 6 }, // 富山
+  "17": { row: 5, col: 5 }, // 石川
+  "18": { row: 6, col: 5 }, // 福井
+  "19": { row: 7, col: 6 }, // 山梨
+  "20": { row: 5, col: 7 }, // 長野
+  "21": { row: 6, col: 6 }, // 岐阜
+  "22": { row: 8, col: 7 }, // 静岡
+  "23": { row: 7, col: 5 }, // 愛知
+  // 近畿
+  "24": { row: 8, col: 5 }, // 三重
+  "25": { row: 7, col: 4 }, // 滋賀
+  "26": { row: 6, col: 4 }, // 京都
+  "27": { row: 8, col: 4 }, // 大阪
+  "28": { row: 7, col: 3 }, // 兵庫
+  "29": { row: 8, col: 3 }, // 奈良
+  "30": { row: 9, col: 4 }, // 和歌山
+  // 中国
+  "31": { row: 6, col: 3 }, // 鳥取
+  "32": { row: 6, col: 2 }, // 島根
+  "33": { row: 7, col: 2 }, // 岡山
+  "34": { row: 7, col: 1 }, // 広島
+  "35": { row: 8, col: 1 }, // 山口
+  // 四国
+  "36": { row: 9, col: 3 }, // 徳島
+  "37": { row: 8, col: 2 }, // 香川
+  "38": { row: 9, col: 1 }, // 愛媛
+  "39": { row: 9, col: 2 }, // 高知
+  // 九州
+  "40": { row: 9, col: 0 }, // 福岡
+  "41": { row: 10, col: 0 }, // 佐賀
+  "42": { row: 11, col: 0 }, // 長崎
+  "43": { row: 10, col: 1 }, // 熊本
+  "44": { row: 9, col: 1 }, // 大分（調整）
+  "45": { row: 11, col: 1 }, // 宮崎
+  "46": { row: 12, col: 0 }, // 鹿児島
+  // 沖縄
+  "47": { row: 13, col: 0 }, // 沖縄
+};
+
+// 大分の位置を修正（山口と被るため）
+mapPositions["44"] = { row: 10, col: 0.5 };
+
 const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
+  const [tabValue, setTabValue] = useState(0);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   const getRegionColor = (prefCode: string) => {
@@ -89,32 +155,95 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
 
   const selectedPrefData = prefectures.find((p) => p.code === selectedPref);
 
-  return (
-    <Box>
-      {/* 選択中の表示 */}
-      {selectedPref && (
-        <Paper
-          sx={{
-            p: 1.5,
-            mb: 2,
-            bgcolor: "primary.light",
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <CheckCircleIcon color="primary" fontSize="small" />
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              選択中の選挙区
-            </Typography>
-            <Typography variant="subtitle2" fontWeight="bold" color="primary.dark">
-              {selectedPrefData?.name}（{selectedPrefData?.region}）
+  const handlePrefClick = (code: string, name: string) => {
+    onSelect(code, name);
+  };
+
+  // 地図UIコンポーネント
+  const MapUI = () => (
+    <Box sx={{ position: "relative", width: "100%", pt: 1 }}>
+      {/* グリッドベースの地図 */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(10, 1fr)",
+          gridTemplateRows: "repeat(14, 1fr)",
+          gap: 0.3,
+          aspectRatio: "10/14",
+          maxWidth: 350,
+          mx: "auto",
+        }}
+      >
+        {prefectures.map((pref) => {
+          const pos = mapPositions[pref.code];
+          if (!pos) return null;
+          const isSelected = selectedPref === pref.code;
+          const regionColor = getRegionColor(pref.code);
+
+          return (
+            <Box
+              key={pref.code}
+              onClick={() => handlePrefClick(pref.code, pref.name)}
+              sx={{
+                gridColumn: Math.floor(pos.col) + 1,
+                gridRow: pos.row + 1,
+                bgcolor: isSelected ? "primary.main" : regionColor,
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: { xs: "0.5rem", sm: "0.6rem" },
+                fontWeight: "bold",
+                borderRadius: 0.5,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                border: isSelected ? "2px solid #000" : "1px solid rgba(255,255,255,0.3)",
+                "&:hover": {
+                  transform: "scale(1.1)",
+                  zIndex: 10,
+                  boxShadow: 2,
+                },
+                minHeight: { xs: 20, sm: 24 },
+              }}
+            >
+              {pref.name.replace(/県|府|都|道/, "")}
+            </Box>
+          );
+        })}
+      </Box>
+
+      {/* 凡例 */}
+      <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center" }}>
+        {regions.map((region) => (
+          <Box
+            key={region.name}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.3,
+              fontSize: "0.6rem",
+            }}
+          >
+            <Box
+              sx={{
+                width: 10,
+                height: 10,
+                bgcolor: region.color,
+                borderRadius: 0.3,
+              }}
+            />
+            <Typography variant="caption" sx={{ fontSize: "0.6rem" }}>
+              {region.name}
             </Typography>
           </Box>
-        </Paper>
-      )}
+        ))}
+      </Box>
+    </Box>
+  );
 
+  // リスト選択UIコンポーネント
+  const ListUI = () => (
+    <Box>
       {/* 地域選択 */}
       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
         ① 地域を選択
@@ -193,6 +322,58 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
           </Typography>
         </Paper>
       )}
+    </Box>
+  );
+
+  return (
+    <Box>
+      {/* 選択中の表示 */}
+      {selectedPref && (
+        <Paper
+          sx={{
+            p: 1.5,
+            mb: 2,
+            bgcolor: "primary.light",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <CheckCircleIcon color="primary" fontSize="small" />
+          <Box>
+            <Typography variant="caption" color="text.secondary">
+              選択中の選挙区
+            </Typography>
+            <Typography variant="subtitle2" fontWeight="bold" color="primary.dark">
+              {selectedPrefData?.name}（{selectedPrefData?.region}）
+            </Typography>
+          </Box>
+        </Paper>
+      )}
+
+      {/* タブ切り替え */}
+      <Tabs
+        value={tabValue}
+        onChange={(_, newValue) => setTabValue(newValue)}
+        sx={{ mb: 2, minHeight: 36 }}
+        variant="fullWidth"
+      >
+        <Tab
+          icon={<MapIcon sx={{ fontSize: 16 }} />}
+          iconPosition="start"
+          label="地図から選択"
+          sx={{ minHeight: 36, fontSize: "0.75rem", py: 0.5 }}
+        />
+        <Tab
+          icon={<ListIcon sx={{ fontSize: 16 }} />}
+          iconPosition="start"
+          label="リストから選択"
+          sx={{ minHeight: 36, fontSize: "0.75rem", py: 0.5 }}
+        />
+      </Tabs>
+
+      {/* タブコンテンツ */}
+      {tabValue === 0 ? <MapUI /> : <ListUI />}
     </Box>
   );
 };
