@@ -30,6 +30,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Layout from "../component/templates/layout";
 import JapanMap from "../features/inquire/parts/japanMap";
+import RhfDatePicker from "../component/molecules/rhfForm/rhfDatePicker";
+import RhfDateTimePicker from "../component/molecules/rhfForm/rhfDateTimePicker";
 import Link from "next/link";
 
 // Icons
@@ -115,7 +117,7 @@ const ContactPage = () => {
       parliamentType: "chairman",
       prefCode: "",
       prefName: "",
-      notificationDate: "",
+      notificationDate: null as Date | null,
       name: "",
       furigana: "",
       postCode: "",
@@ -127,10 +129,10 @@ const ContactPage = () => {
       officeTel: "",
       contactPerson: "",
       preferredContact: "phone",
-      deliveryDate: "",
+      deliveryDate: null as Date | null,
       deliveryLocation: "office",
       deliveryOther: "",
-      returnDate: "",
+      returnDate: null as Date | null,
       returnLocation: "office",
       returnOther: "",
       notes: "",
@@ -308,18 +310,12 @@ const ContactPage = () => {
                   <CalendarTodayIcon fontSize="small" color="primary" />
                   告示日（わかれば）
                 </Typography>
-                <Controller
-                  name="notificationDate"
+                <RhfDatePicker
                   control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      type="date"
-                      fullWidth
-                      size="small"
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  )}
+                  errors={errors}
+                  name="notificationDate"
+                  label="告示日"
+                  size="small"
                 />
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
                   未定の場合は空欄で構いません
@@ -540,19 +536,11 @@ const ContactPage = () => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <Controller
-                    name="deliveryDate"
+                  <RhfDateTimePicker
                     control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        type="datetime-local"
-                        label="希望納車日時"
-                        fullWidth
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    )}
+                    errors={errors}
+                    name="deliveryDate"
+                    label="希望納車日時"
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -598,19 +586,11 @@ const ContactPage = () => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <Controller
-                    name="returnDate"
+                  <RhfDateTimePicker
                     control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        type="datetime-local"
-                        label="希望引取日時"
-                        fullWidth
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
-                      />
-                    )}
+                    errors={errors}
+                    name="returnDate"
+                    label="希望引取日時"
                   />
                 </Grid>
                 <Grid item xs={12}>
