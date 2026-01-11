@@ -33,6 +33,15 @@ import { CalcDataType } from "../simulation/calc/calcSimulation";
 import { useRouter } from "next/router";
 import {useLeavePageConfirmation} from "../../hooks/useLeavePageConfirmation";
 import { prefCd } from "../../constants/preCd";
+import {
+  calcRentalDays,
+  calcDaysUntilNotification,
+  calcPublicSubsidy,
+  generateMapsUrl,
+  getSubmissionDateTime,
+  formatPrice,
+  formatPriceWithTax,
+} from "../../utils/emailHelpers";
 
 
 
@@ -70,13 +79,36 @@ export const CheckDisplay = () => {
   const sendMail = () => {
     const userID = process.env.NEXT_PUBLIC_USER_ID;
     const serviceID = process.env.NEXT_PUBLIC_SERVICE_ID;
-    const templateID = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 新テンプレートがあればそちらを使用、なければ既存テンプレート
+    const templateID = process.env.NEXT_PUBLIC_TEMPLATE_ID_V2 || process.env.NEXT_PUBLIC_TEMPLATE_ID;
 
     if (userID !== undefined && serviceID !== undefined && templateID !== undefined) {
       // undefinedでなければ、init(userID)で初期化を実行
       init(userID);
 
+      // 追加情報の計算
+      const rentalDays = calcRentalDays(inputData?.startDateTime || "", inputData?.endDateTime || "");
+      const daysUntilNotification = calcDaysUntilNotification(inputData?.notificationDate || "");
+      const publicSubsidy = calcPublicSubsidy(rentalDays);
+      const submissionDateTime = getSubmissionDateTime();
+
+      // 納車・引取先住所（Google Maps用）
+      const deliveryAddress = inputData?.startLocation === "office"
+        ? inputData?.officeAddress
+        : inputData?.startLocation === "home"
+        ? inputData?.address
+        : inputData?.startOther;
+      const pickupAddress = inputData?.endLocation === "office"
+        ? inputData?.officeAddress
+        : inputData?.endLocation === "home"
+        ? inputData?.address
+        : inputData?.endOther;
+
       const template_param = {
+        // ========== 受信情報 ==========
+        submissionDateTime, // 受信日時
+
+        // ========== お客様情報 ==========
         name: inputData?.name, //"お名前"
         furigana: inputData?.furigana, //"フリガナ"
         postCode: inputData?.postCode, //"郵便番号"
@@ -84,32 +116,41 @@ export const CheckDisplay = () => {
         tel: inputData?.tel, //"電話番号"
         mail: inputData?.mail, //"メールアドレス"
 
+        // ========== 選挙事務所情報 ==========
         officePostCode: inputData?.officePostCode, //"選挙事務所郵便番号"
         officeAddress: inputData?.officeAddress, //"選挙事務所住所"
         officeTel: inputData?.officeTel, //"選挙事務所電話番号"
         liabilityName: inputData?.liabilityName, //"選挙責任者（今後の窓口の方）"
         contactType: ContactType(inputData?.contactType), //"当社との連絡方法"
 
+        // ========== 納車・引取情報 ==========
         startDateTime: inputData?.startDateTime, // "納車日時"
         startLocation: LocationConv(inputData?.startLocation), // "納車場所"
+        startAddress: deliveryAddress || "", // 納車先住所
         startOther: inputData?.startOther, // "その他の場合の入力フォーム"
+        startMapsUrl: generateMapsUrl(deliveryAddress || ""), // 納車先Google Maps URL
         endDateTime: inputData?.endDateTime, // "引取日時"
         endLocation: LocationConv(inputData?.endLocation), // "引取場所"
+        endAddress: pickupAddress || "", // 引取先住所
         endOther: inputData?.endOther, // "その他の場合の入力フォーム"
+        endMapsUrl: generateMapsUrl(pickupAddress || ""), // 引取先Google Maps URL
         note: inputData?.note, //"備考"
 
+        // ========== 選挙情報 ==========
         electoralClass: ElectoralClassConv(sendData?.electoralClass), // 選挙区分
         electionArea: inputData?.electionArea.label, // 選挙エリア
         parliamentClass: ParliamentClassConv(inputData?.parliamentClass), // 議会区分
         notificationDate: inputData?.notificationDate, // 告示日
+        daysUntilNotification: daysUntilNotification > 0 ? `${daysUntilNotification}日後` : daysUntilNotification === 0 ? "本日" : `${Math.abs(daysUntilNotification)}日前`, // 告示日までの日数
 
+        // ========== 車両情報 ==========
         carClass: CarClassConv(sendData?.carClass), // 車種クラス
         carType: CarTypeConv(sendData?.carType[sendData?.carClass]), // 車種タイプ
         signalLight: SignalLightConv(sendData?.signalLight), // ライト区分
         ampSize: WattConv(sendData?.ampSize), // アンプサイズ
         speaker: SpeakerConv(sendData?.speaker), // スピーカー
 
-        // オプション
+        // ========== オプション ==========
         wirelessMike: OptionConv(sendData?.wirelessMike), // ワイヤレスマイク
         wirelessMikeNumber: sendData?.wirelessMike ? sendData?.wirelessMikeNumber : null, //ワイヤレスマイク数
         sd: OptionConv(sendData?.sd), // SDカード
@@ -120,7 +161,7 @@ export const CheckDisplay = () => {
         insuranceDays: sendData?.insurance ? DayConv(sendData?.insuranceDays) : DayConv(0), // 保険日数
         bodyRapping: OptionConv(sendData?.bodyRapping), // ボディラッピング
 
-        // 配送先
+        // ========== 配送先 ==========
         deliveryPrefecture: prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択",
         deliveryFee: calcData?.delivery?.isConsultation
           ? "要相談"
@@ -128,7 +169,7 @@ export const CheckDisplay = () => {
           ? "無料"
           : PriceTaxConv(calcData?.deliveryPrice),
 
-        //金額
+        // ========== 金額（合計） ==========
         subTotalPrice: PriceTaxConv(calcData?.subTotalPrice),
         optionTotalPrice: PriceTaxConv(calcData?.optionTotalPrice),
         deliveryPrice: calcData?.delivery?.isConsultation
@@ -137,12 +178,46 @@ export const CheckDisplay = () => {
           ? "無料"
           : PriceTaxConv(calcData?.deliveryPrice),
         totalPrice: PriceTaxConv(calcData?.totalPrice),
+
+        // ========== 金額（内訳詳細） ==========
+        // 車両関連
+        priceCarBase: formatPrice(calcData?.subs?.carPrice), // 車両本体価格
+        priceAmp: formatPrice(calcData?.subs?.ampSize), // アンプ価格
+        priceSignalLight: formatPrice(calcData?.subs?.signalLight), // 信号灯価格
+        priceTakingPlatform: formatPrice(calcData?.subs?.takingPlatform), // 立ち台価格
+        // オプション個別
+        priceWirelessMike: formatPrice(calcData?.options?.totalMikePrice), // ワイヤレスマイク価格
+        priceSd: formatPrice(calcData?.options?.sdPrice), // SDカード価格
+        priceWirelessIncome: formatPrice(calcData?.options?.incomePrice), // ワイヤレスインカム価格
+        priceHandSpeaker: formatPrice(calcData?.options?.handSpeakerPrice), // ハンドスピーカー価格
+        priceBluetoothUnit: formatPrice(calcData?.options?.bluetoothUnit), // Bluetoothユニット価格
+        priceInsuranceDaily: formatPrice(calcData?.options?.insurancePrice), // 保険（1日あたり）
+        priceInsuranceTotal: formatPrice(calcData?.options?.totalInsurancePrice), // 保険（合計）
+        // 配送
+        priceDeliveryFee: formatPrice(calcData?.delivery?.fee), // 配送料（片道）
+
+        // ========== レンタル情報 ==========
+        rentalDays: `${rentalDays}日間`, // レンタル日数
+        publicSubsidy: formatPriceWithTax(publicSubsidy), // 公費負担概算
       };
 
-      send(serviceID, templateID, template_param, "tvR3Qt2HckYv81QKY").then(() => {
-        router.push("thanks")
-        setOpen(false);
-      });
+      console.log("Sending email with template:", templateID);
+      console.log("Template params:", template_param);
+
+      send(serviceID, templateID, template_param, "tvR3Qt2HckYv81QKY")
+        .then((response) => {
+          console.log("Email sent successfully:", response);
+          router.push("thanks");
+          setOpen(false);
+        })
+        .catch((error) => {
+          console.error("Email send failed:", error);
+          alert("メール送信に失敗しました: " + JSON.stringify(error));
+          setOpen(false);
+        });
+    } else {
+      console.error("Missing EmailJS config:", { userID, serviceID, templateID });
+      alert("EmailJS設定が不足しています");
     }
   };
 

@@ -22,7 +22,7 @@ export default defineConfig({
   // 共通設定
   use: {
     // 開発サーバーのURL
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3009',
 
     // スクリーンショット（失敗時のみ）
     screenshot: 'only-on-failure',
@@ -50,9 +50,9 @@ export default defineConfig({
 
   // 開発サーバー自動起動
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    command: 'npm run dev -- -p 3009',
+    url: 'http://localhost:3009',
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

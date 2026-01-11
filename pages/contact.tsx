@@ -2,14 +2,17 @@
  * お問い合わせ・予約ページ
  */
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Seo from "../component/atoms/Seo";
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Collapse,
   Divider,
   FormControl,
@@ -37,6 +40,31 @@ import JapanMap from "../features/inquire/parts/japanMap";
 import RhfDatePicker from "../component/molecules/rhfForm/rhfDatePicker";
 import RhfDateTimePicker from "../component/molecules/rhfForm/rhfDateTimePicker";
 import Link from "next/link";
+import { init, send } from "emailjs-com";
+import moment from "moment";
+import {
+  getSubmissionDateTime,
+  calcRentalDays,
+  calcDaysUntilNotification,
+  calcPublicSubsidy,
+  generateMapsUrl,
+  formatPrice,
+  formatPriceWithTax,
+} from "../utils/emailHelpers";
+import { useQState } from "../hooks/library/useQstate";
+import { SendDataType } from "../features/simulation/utils/sendDataType";
+import { CalcDataType } from "../features/simulation/calc/calcSimulation";
+import {
+  CarClassConv,
+  CarTypeConv,
+  SignalLightConv,
+  WattConv,
+  SpeakerConv,
+  OptionConv,
+  DayConv,
+  PriceTaxConv,
+} from "../utils/dataConv";
+import { prefCd } from "../constants/preCd";
 
 // Icons
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -91,12 +119,18 @@ const electionTypes = [
 const steps = ["選挙情報", "お客様情報", "納車・引取", "確認"];
 
 const ContactPage = () => {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [selectedPref, setSelectedPref] = useState("");
   const [selectedPrefName, setSelectedPrefName] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [zip, setZip] = useState("");
   const [zipTarget, setZipTarget] = useState<"personal" | "office">("personal");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // シミュレーションからのデータ
+  const [sendData] = useQState<SendDataType>(["sendData"]);
+  const [calcData] = useQState<CalcDataType>(["calcData"]);
 
   const address = useGetZipAddress(zip);
 
@@ -181,7 +215,165 @@ const ContactPage = () => {
 
   const onSubmit = (data: any) => {
     console.log("Form submitted:", data);
-    // 送信処理
+    setIsSubmitting(true);
+
+    const userID = process.env.NEXT_PUBLIC_USER_ID;
+    const serviceID = process.env.NEXT_PUBLIC_SERVICE_ID;
+    const templateID = process.env.NEXT_PUBLIC_TEMPLATE_ID_V2 || process.env.NEXT_PUBLIC_TEMPLATE_ID;
+
+    if (!userID || !serviceID || !templateID) {
+      console.error("Missing EmailJS config:", { userID, serviceID, templateID });
+      alert("メール設定が不足しています。");
+      setIsSubmitting(false);
+      return;
+    }
+
+    init(userID);
+
+    // 日時フォーマット
+    const deliveryDateTime = data.deliveryDate ? moment(data.deliveryDate).format("YYYY/MM/DD HH:mm") : "";
+    const returnDateTime = data.returnDate ? moment(data.returnDate).format("YYYY/MM/DD HH:mm") : "";
+    const notificationDateStr = data.notificationDate ? moment(data.notificationDate).format("YYYY/MM/DD") : "";
+
+    // 選挙種別ラベル
+    const electionTypeLabel = electionTypes.find(t => t.value === data.electionType)?.label || "";
+
+    // 納車・引取場所
+    const deliveryLocationMap: { [key: string]: string } = {
+      office: "選挙事務所",
+      home: "自宅",
+      other: "その他",
+    };
+
+    // レンタル日数と公費計算
+    const rentalDays = calcRentalDays(deliveryDateTime, returnDateTime);
+    const daysUntilNotification = calcDaysUntilNotification(notificationDateStr);
+    const publicSubsidy = calcPublicSubsidy(rentalDays);
+
+    // 納車・引取先住所（Google Maps用）
+    const deliveryAddress = data.deliveryLocation === "office"
+      ? data.officeAddress
+      : data.deliveryLocation === "home"
+      ? data.address
+      : data.deliveryOther;
+    const pickupAddress = data.returnLocation === "office"
+      ? data.officeAddress
+      : data.returnLocation === "home"
+      ? data.address
+      : data.returnOther;
+
+    const template_param = {
+      // ========== 受信情報 ==========
+      submissionDateTime: getSubmissionDateTime(),
+
+      // ========== お客様情報 ==========
+      name: data.name,
+      furigana: data.furigana,
+      postCode: data.postCode,
+      address: data.address,
+      tel: data.tel,
+      mail: data.email,
+
+      // ========== 選挙事務所情報 ==========
+      officePostCode: data.officePostCode,
+      officeAddress: data.officeAddress,
+      officeTel: data.officeTel,
+      liabilityName: data.contactPerson,
+      contactType: data.preferredContact === "phone" ? "電話" : data.preferredContact === "email" ? "メール" : data.preferredContact,
+
+      // ========== 納車・引取情報 ==========
+      startDateTime: deliveryDateTime,
+      startLocation: deliveryLocationMap[data.deliveryLocation] || data.deliveryLocation,
+      startAddress: deliveryAddress || "",
+      startOther: data.deliveryOther,
+      startMapsUrl: generateMapsUrl(deliveryAddress || ""),
+      endDateTime: returnDateTime,
+      endLocation: deliveryLocationMap[data.returnLocation] || data.returnLocation,
+      endAddress: pickupAddress || "",
+      endOther: data.returnOther,
+      endMapsUrl: generateMapsUrl(pickupAddress || ""),
+      note: data.notes,
+
+      // ========== 選挙情報 ==========
+      electoralClass: electionTypeLabel,
+      electionArea: selectedPrefName || "未選択",
+      parliamentClass: data.parliamentType === "chairman" ? "議員" : "首長",
+      notificationDate: notificationDateStr,
+      daysUntilNotification: daysUntilNotification > 0
+        ? `${daysUntilNotification}日後`
+        : daysUntilNotification === 0
+        ? "本日"
+        : `${Math.abs(daysUntilNotification)}日前`,
+
+      // ========== 車両情報（シミュレーションから） ==========
+      carClass: CarClassConv(sendData?.carClass || ""),
+      carType: CarTypeConv(sendData?.carType?.[sendData?.carClass] || ""),
+      signalLight: SignalLightConv(sendData?.signalLight || ""),
+      ampSize: WattConv(sendData?.ampSize || ""),
+      speaker: SpeakerConv(sendData?.speaker || ""),
+
+      // ========== オプション ==========
+      wirelessMike: OptionConv(sendData?.wirelessMike),
+      wirelessMikeNumber: sendData?.wirelessMike ? sendData?.wirelessMikeNumber : null,
+      sd: OptionConv(sendData?.sd),
+      wirelessIncome: OptionConv(sendData?.wirelessIncome),
+      handSpeaker: OptionConv(sendData?.handSpeaker),
+      bluetoothUnit: OptionConv(sendData?.bluetoothUnit),
+      insurance: OptionConv(sendData?.insurance),
+      insuranceDays: sendData?.insurance ? DayConv(sendData?.insuranceDays) : DayConv(0),
+      bodyRapping: OptionConv(sendData?.bodyRapping),
+
+      // ========== 配送先 ==========
+      deliveryPrefecture: prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択",
+      deliveryFee: calcData?.delivery?.isConsultation
+        ? "要相談"
+        : calcData?.delivery?.fee === 0
+        ? "無料"
+        : PriceTaxConv(calcData?.deliveryPrice),
+
+      // ========== 金額（合計） ==========
+      subTotalPrice: PriceTaxConv(calcData?.subTotalPrice),
+      optionTotalPrice: PriceTaxConv(calcData?.optionTotalPrice),
+      deliveryPrice: calcData?.delivery?.isConsultation
+        ? "要相談"
+        : calcData?.delivery?.fee === 0
+        ? "無料"
+        : PriceTaxConv(calcData?.deliveryPrice),
+      totalPrice: PriceTaxConv(calcData?.totalPrice),
+
+      // ========== 金額（内訳詳細） ==========
+      priceCarBase: formatPrice(calcData?.subs?.carPrice),
+      priceAmp: formatPrice(calcData?.subs?.ampSize),
+      priceSignalLight: formatPrice(calcData?.subs?.signalLight),
+      priceTakingPlatform: formatPrice(calcData?.subs?.takingPlatform),
+      priceWirelessMike: formatPrice(calcData?.options?.totalMikePrice),
+      priceSd: formatPrice(calcData?.options?.sdPrice),
+      priceWirelessIncome: formatPrice(calcData?.options?.incomePrice),
+      priceHandSpeaker: formatPrice(calcData?.options?.handSpeakerPrice),
+      priceBluetoothUnit: formatPrice(calcData?.options?.bluetoothUnit),
+      priceInsuranceDaily: formatPrice(calcData?.options?.insurancePrice),
+      priceInsuranceTotal: formatPrice(calcData?.options?.totalInsurancePrice),
+      priceDeliveryFee: formatPrice(calcData?.delivery?.fee),
+
+      // ========== レンタル情報 ==========
+      rentalDays: rentalDays > 0 ? `${rentalDays}日間` : "",
+      publicSubsidy: formatPriceWithTax(publicSubsidy),
+    };
+
+    console.log("Sending email with template:", templateID);
+    console.log("Template params:", template_param);
+
+    send(serviceID, templateID, template_param, "tvR3Qt2HckYv81QKY")
+      .then((response) => {
+        console.log("Email sent successfully:", response);
+        setIsSubmitting(false);
+        router.push("/thanks");
+      })
+      .catch((error) => {
+        console.error("Email send failed:", error);
+        alert("メール送信に失敗しました: " + JSON.stringify(error));
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -721,6 +913,14 @@ const ContactPage = () => {
             住所が見つかりませんでした
           </Alert>
         </Snackbar>
+
+        {/* 送信中ローディング */}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={isSubmitting}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </Box>
     </Layout>
   );

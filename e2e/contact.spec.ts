@@ -118,4 +118,88 @@ test.describe("お問合せページ", () => {
     // 電話で相談リンクが表示される
     await expect(page.locator("a[href*='tel']")).toBeVisible();
   });
+
+  test("TC-CON-009: メール送信テスト（シミュレーションから）", async ({ page }) => {
+    // コンソールログを監視
+    page.on('console', msg => {
+      console.log('Browser console:', msg.type(), msg.text());
+    });
+
+    // シミュレーションページから開始
+    await page.goto("/");
+    await page.waitForTimeout(1000);
+
+    // 車種を選択（Mクラスをクリック）
+    await page.locator("text=Mクラス").first().click();
+    await page.waitForTimeout(500);
+
+    // お問合せボタンをクリック
+    await page.locator("button:has-text('お問合せ')").click();
+    await page.waitForTimeout(1000);
+
+    // contactページに遷移確認
+    await expect(page).toHaveURL(/.*contact/);
+
+    // ステップ1: 選挙種類を選択
+    await page.locator("text=統一地方選挙").first().click();
+    await page.waitForTimeout(300);
+
+    // 都道府県を選択（地図の東京をクリック）
+    // 地図はBox要素で描画されており、"東京"というテキストを含む
+    const tokyoBox = page.locator("text=東京").first();
+    if (await tokyoBox.isVisible()) {
+      await tokyoBox.click();
+      await page.waitForTimeout(300);
+    }
+
+    await page.locator("button:has-text('次へ')").click();
+    await page.waitForTimeout(500);
+
+    // ステップ2: お客様情報を入力（全項目）
+    // 基本情報
+    await page.getByLabel(/お名前/).fill("テスト太郎");
+    await page.getByLabel(/フリガナ/).fill("テストタロウ");
+    await page.getByLabel(/郵便番号/).first().fill("100-0001");
+    await page.getByLabel(/住所/).first().fill("東京都千代田区千代田1-1");
+    await page.getByLabel(/電話番号/).first().fill("090-1234-5678");
+    await page.getByLabel(/メールアドレス/).fill("test@example.com");
+
+    // 選挙事務所情報
+    await page.getByLabel(/事務所郵便番号/).fill("100-0002");
+    await page.getByLabel(/事務所住所/).fill("東京都千代田区皇居外苑2-2");
+    await page.getByLabel(/事務所電話番号/).fill("03-1234-5678");
+    await page.getByLabel(/ご担当者名/).fill("選挙 責任者");
+
+    // 次へボタンをクリック
+    await page.locator("button:has-text('次へ')").click();
+    await page.waitForTimeout(500);
+
+    // ステップ3: 納車・引取情報
+    // 納車日時を入力（DateTimePickerをクリックして入力）
+    const deliveryDateInput = page.getByLabel(/希望納車日時/);
+    await deliveryDateInput.click();
+    await deliveryDateInput.fill("2026/01/20 10:00");
+    await page.keyboard.press("Escape"); // DatePickerを閉じる
+    await page.waitForTimeout(300);
+
+    // 引取日時を入力
+    const returnDateInput = page.getByLabel(/希望引取日時/);
+    await returnDateInput.click();
+    await returnDateInput.fill("2026/01/27 17:00");
+    await page.keyboard.press("Escape"); // DatePickerを閉じる
+    await page.waitForTimeout(300);
+
+    await page.locator("button:has-text('次へ')").click();
+    await page.waitForTimeout(500);
+
+    // ステップ4: 確認画面で送信
+    const submitButton = page.locator("button:has-text('送信する')");
+    await expect(submitButton).toBeVisible({ timeout: 10000 });
+
+    // 送信ボタンをクリック（ローディング中にボタンが無効になる可能性があるのでforce）
+    await submitButton.click({ force: true });
+
+    // 完了ページに遷移するか確認（タイムアウト30秒）
+    await expect(page).toHaveURL(/.*thanks/, { timeout: 30000 });
+  });
 });

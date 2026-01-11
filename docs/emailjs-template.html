@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>選挙カーレンタル お問い合わせ</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+          <!-- ヘッダー -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #ff1250 0%, #ff4d7a 100%); padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+              <div style="background-color: #ffffff; display: inline-block; padding: 8px 16px; border-radius: 6px; margin-bottom: 12px;">
+                <img src="https://senkyocar-labo.com/img/logo.svg" alt="選挙カーLABo." style="height: 30px; display: block;">
+              </div>
+              <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: bold;">お見積り・ご予約</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 13px;">新規お問い合わせを受信しました</p>
+            </td>
+          </tr>
+
+          <!-- 受信日時バー -->
+          <tr>
+            <td style="background-color: #fef0f3; padding: 12px 20px; border-bottom: 1px solid #fdd;">
+              <p style="margin: 0; color: #ff1250; font-weight: bold; font-size: 12px;">受信: {{submissionDateTime}}</p>
+              <p style="margin: 4px 0 0; color: #ff1250; font-weight: bold; font-size: 12px;">告示日まで: {{daysUntilNotification}}</p>
+            </td>
+          </tr>
+
+          <!-- 合計金額ボックス -->
+          <tr>
+            <td style="padding: 20px;">
+              <table role="presentation" style="width: 100%; background: linear-gradient(135deg, #ff1250 0%, #ff4d7a 100%); border-radius: 8px;">
+                <tr>
+                  <td style="padding: 20px; text-align: center;">
+                    <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px; font-size: 13px;">お見積り合計金額</p>
+                    <p style="color: #ffffff; margin: 0; font-size: 26px; font-weight: bold;">{{totalPrice}}</p>
+                    <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 11px;">レンタル: {{rentalDays}} ｜ 公費概算: {{publicSubsidy}}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- お客様情報 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">お客様情報</h2>
+              <table role="presentation" style="width: 100%; margin-bottom: 20px; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; width: 90px;">お名前</td>
+                  <td style="padding: 6px 0; font-weight: bold;">{{name}} 様</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">フリガナ</td>
+                  <td style="padding: 6px 0;">{{furigana}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">電話番号</td>
+                  <td style="padding: 6px 0;"><a href="tel:{{tel}}" style="color: #ff1250;">{{tel}}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">メール</td>
+                  <td style="padding: 6px 0; word-break: break-all;"><a href="mailto:{{mail}}" style="color: #ff1250;">{{mail}}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666; vertical-align: top;">住所</td>
+                  <td style="padding: 6px 0;">〒{{postCode}}<br>{{address}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">連絡方法</td>
+                  <td style="padding: 6px 0;">{{contactType}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 選挙事務所情報 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">選挙事務所情報</h2>
+              <table role="presentation" style="width: 100%; margin-bottom: 20px; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; width: 90px; vertical-align: top;">住所</td>
+                  <td style="padding: 6px 0;">〒{{officePostCode}}<br>{{officeAddress}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">電話番号</td>
+                  <td style="padding: 6px 0;"><a href="tel:{{officeTel}}" style="color: #ff1250;">{{officeTel}}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">選挙責任者</td>
+                  <td style="padding: 6px 0;">{{liabilityName}} 様</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 選挙情報 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">選挙情報</h2>
+              <table role="presentation" style="width: 100%; margin-bottom: 20px; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; width: 90px;">選挙区分</td>
+                  <td style="padding: 6px 0;">{{electoralClass}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">選挙エリア</td>
+                  <td style="padding: 6px 0;">{{electionArea}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">議会区分</td>
+                  <td style="padding: 6px 0;">{{parliamentClass}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">告示日</td>
+                  <td style="padding: 6px 0; font-weight: bold; color: #ff1250;">{{notificationDate}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 納車・引取情報 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">納車・引取情報</h2>
+
+              <!-- 納車カード -->
+              <table role="presentation" style="width: 100%; margin-bottom: 12px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px; background-color: #f8f8f8;">
+                    <p style="margin: 0 0 6px; color: #666; font-size: 11px; font-weight: bold;">🚗 納車</p>
+                    <p style="margin: 0; font-size: 15px; font-weight: bold; color: #333;">{{startDateTime}}</p>
+                    <p style="margin: 6px 0 0; font-size: 12px; color: #555;">{{startLocation}}</p>
+                    <p style="margin: 4px 0 0; font-size: 12px; color: #333;">{{startAddress}}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0;">
+                    <a href="{{startMapsUrl}}" target="_blank" style="display: block; text-decoration: none; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 10px; text-align: center; border-top: 1px solid #a5d6a7;">
+                      <span style="color: #2e7d32; font-size: 12px; font-weight: bold;">📍 Google Mapsで開く</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- 引取カード -->
+              <table role="presentation" style="width: 100%; margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px; background-color: #f8f8f8;">
+                    <p style="margin: 0 0 6px; color: #666; font-size: 11px; font-weight: bold;">🏁 引取</p>
+                    <p style="margin: 0; font-size: 15px; font-weight: bold; color: #333;">{{endDateTime}}</p>
+                    <p style="margin: 6px 0 0; font-size: 12px; color: #555;">{{endLocation}}</p>
+                    <p style="margin: 4px 0 0; font-size: 12px; color: #333;">{{endAddress}}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0;">
+                    <a href="{{endMapsUrl}}" target="_blank" style="display: block; text-decoration: none; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 10px; text-align: center; border-top: 1px solid #90caf9;">
+                      <span style="color: #1565c0; font-size: 12px; font-weight: bold;">📍 Google Mapsで開く</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 車両情報 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">車両情報</h2>
+              <table role="presentation" style="width: 100%; margin-bottom: 20px; font-size: 13px;">
+                <tr>
+                  <td style="padding: 6px 0; color: #666; width: 90px;">車種クラス</td>
+                  <td style="padding: 6px 0;">{{carClass}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">車種</td>
+                  <td style="padding: 6px 0;">{{carType}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">ライト区分</td>
+                  <td style="padding: 6px 0;">{{signalLight}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">アンプ</td>
+                  <td style="padding: 6px 0;">{{ampSize}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #666;">スピーカー</td>
+                  <td style="padding: 6px 0;">{{speaker}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 料金内訳 -->
+          <tr>
+            <td style="padding: 0 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">料金内訳</h2>
+
+              <!-- 車両料金 -->
+              <table role="presentation" style="width: 100%; margin-bottom: 12px; background-color: #fafafa; border-radius: 6px; font-size: 12px;">
+                <tr>
+                  <td colspan="2" style="padding: 8px 10px; background-color: #f0f0f0; font-weight: bold; border-radius: 6px 6px 0 0;">車両関連</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">車両本体</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{priceCarBase}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">アンプ</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{priceAmp}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">信号灯</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{priceSignalLight}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">立ち台</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{priceTakingPlatform}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 10px; font-weight: bold; border-top: 1px solid #ddd;">車両小計</td>
+                  <td style="padding: 8px 10px; font-weight: bold; text-align: right; border-top: 1px solid #ddd; color: #ff1250;">{{subTotalPrice}}</td>
+                </tr>
+              </table>
+
+              <!-- オプション -->
+              <table role="presentation" style="width: 100%; margin-bottom: 12px; background-color: #fafafa; border-radius: 6px; font-size: 12px;">
+                <tr>
+                  <td colspan="2" style="padding: 8px 10px; background-color: #f0f0f0; font-weight: bold; border-radius: 6px 6px 0 0;">オプション</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">ワイヤレスマイク</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{wirelessMike}} {{priceWirelessMike}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">SDカード</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{sd}} {{priceSd}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">ワイヤレスインカム</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{wirelessIncome}} {{priceWirelessIncome}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">ハンドスピーカー</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{handSpeaker}} {{priceHandSpeaker}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">Bluetoothユニット</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{bluetoothUnit}} {{priceBluetoothUnit}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">保険</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{insurance}} {{insuranceDays}} {{priceInsuranceTotal}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">ボディラッピング</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{bodyRapping}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 10px; font-weight: bold; border-top: 1px solid #ddd;">オプション小計</td>
+                  <td style="padding: 8px 10px; font-weight: bold; text-align: right; border-top: 1px solid #ddd; color: #ff1250;">{{optionTotalPrice}}</td>
+                </tr>
+              </table>
+
+              <!-- 配送 -->
+              <table role="presentation" style="width: 100%; margin-bottom: 15px; background-color: #fafafa; border-radius: 6px; font-size: 12px;">
+                <tr>
+                  <td colspan="2" style="padding: 8px 10px; background-color: #f0f0f0; font-weight: bold; border-radius: 6px 6px 0 0;">配送</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 10px; color: #666;">配送先</td>
+                  <td style="padding: 6px 10px; text-align: right;">{{deliveryPrefecture}}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 10px; font-weight: bold; border-top: 1px solid #ddd;">配送料（往復）</td>
+                  <td style="padding: 8px 10px; font-weight: bold; text-align: right; border-top: 1px solid #ddd; color: #ff1250;">{{deliveryPrice}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 合計 -->
+          <tr>
+            <td style="padding: 0 20px 20px;">
+              <table role="presentation" style="width: 100%; background: linear-gradient(135deg, #ff1250 0%, #ff4d7a 100%); border-radius: 8px;">
+                <tr>
+                  <td style="padding: 15px; text-align: center;">
+                    <p style="color: rgba(255,255,255,0.9); margin: 0 0 5px; font-size: 13px;">合計金額</p>
+                    <p style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">{{totalPrice}}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- 備考 -->
+          <tr>
+            <td style="padding: 0 20px 20px;">
+              <h2 style="color: #ff1250; font-size: 14px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 2px solid #ff1250;">備考</h2>
+              <p style="margin: 0; font-size: 13px; line-height: 1.6; background-color: #f8f8f8; padding: 12px; border-radius: 6px;">{{note}}</p>
+            </td>
+          </tr>
+
+          <!-- フッター -->
+          <tr>
+            <td style="background-color: #333; padding: 20px; border-radius: 0 0 8px 8px; text-align: center;">
+              <p style="color: #ffffff; margin: 0 0 8px; font-size: 13px; font-weight: bold;">選挙カーLABo.</p>
+              <p style="color: #aaa; margin: 0; font-size: 11px;">このメールはウェブサイトから自動送信されています。</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

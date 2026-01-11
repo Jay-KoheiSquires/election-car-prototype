@@ -1,0 +1,102 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+選挙カーLABo. お見積り・ご予約
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+受信日時: {{submissionDateTime}}
+告示日まで: {{daysUntilNotification}}
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  お見積り合計金額: {{totalPrice}}
+┃  レンタル期間: {{rentalDays}}
+┃  公費負担概算: {{publicSubsidy}}
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+──────────────────────────────────
+■ お客様情報
+──────────────────────────────────
+お名前: {{name}} 様（{{furigana}}）
+電話番号: {{tel}}
+メール: {{mail}}
+住所: 〒{{postCode}} {{address}}
+連絡方法: {{contactType}}
+
+──────────────────────────────────
+■ 選挙事務所情報
+──────────────────────────────────
+住所: 〒{{officePostCode}} {{officeAddress}}
+電話番号: {{officeTel}}
+選挙責任者: {{liabilityName}} 様
+
+──────────────────────────────────
+■ 選挙情報
+──────────────────────────────────
+選挙区分: {{electoralClass}}
+選挙エリア: {{electionArea}}
+議会区分: {{parliamentClass}}
+告示日: {{notificationDate}}（{{daysUntilNotification}}）
+
+──────────────────────────────────
+■ 納車・引取情報
+──────────────────────────────────
+【納車】
+日時: {{startDateTime}}
+場所: {{startLocation}}
+住所: {{startAddress}}
+地図: {{startMapsUrl}}
+
+【引取】
+日時: {{endDateTime}}
+場所: {{endLocation}}
+住所: {{endAddress}}
+地図: {{endMapsUrl}}
+
+──────────────────────────────────
+■ 車両情報
+──────────────────────────────────
+車種クラス: {{carClass}}
+車種: {{carType}}
+ライト区分: {{signalLight}}
+アンプサイズ: {{ampSize}}
+スピーカー: {{speaker}}
+
+──────────────────────────────────
+■ 料金内訳
+──────────────────────────────────
+【車両関連】
+  車両本体: {{priceCarBase}}
+  アンプ: {{priceAmp}}
+  信号灯: {{priceSignalLight}}
+  立ち台: {{priceTakingPlatform}}
+  ─────────────────
+  車両小計: {{subTotalPrice}}
+
+【オプション】
+  ワイヤレスマイク: {{wirelessMike}} {{priceWirelessMike}}
+  SDカード: {{sd}} {{priceSd}}
+  ワイヤレスインカム: {{wirelessIncome}} {{priceWirelessIncome}}
+  ハンドスピーカー: {{handSpeaker}} {{priceHandSpeaker}}
+  Bluetoothユニット: {{bluetoothUnit}} {{priceBluetoothUnit}}
+  保険: {{insurance}} {{insuranceDays}} {{priceInsuranceTotal}}
+  ボディラッピング: {{bodyRapping}}
+  ─────────────────
+  オプション小計: {{optionTotalPrice}}
+
+【配送】
+  配送先: {{deliveryPrefecture}}
+  ─────────────────
+  配送料（往復）: {{deliveryPrice}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+合計金額: {{totalPrice}}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+──────────────────────────────────
+■ 備考
+──────────────────────────────────
+{{note}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+選挙カーLABo.
+このメールはウェブサイトのお問い合わせフォームから
+自動送信されています。
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
