@@ -1,17 +1,15 @@
+/**
+ * 選挙区分選択コンポーネント
+ * 一般地方選挙/統一地方選挙/衆参選挙/広告宣伝車を選択
+ */
 import { Container, Grid } from "@mui/material";
-
-import React from "react";
+import React, { memo } from "react";
 import { RhfSelectBox } from "../../../component/molecules/rhfForm";
 import RhfToggleButtonGroup from "../../../component/molecules/rhfForm/rhfToggleButtonGroup";
 import { useGetWindowSize } from "../../../hooks/useGetWindowSize";
+import { FormPropsWithSetValue } from "../types/formTypes";
 
-interface Props {
-  control: any;
-  errors: any;
-  setValue: any;
-}
-
-const ElectionDiv = ({ control, errors, setValue }: Props) => {
+const ElectionDiv = memo(({ control, errors }: FormPropsWithSetValue) => {
   const windowSize = useGetWindowSize();
   const noSmartPhone = windowSize.width >= 600;
   return (
@@ -58,6 +56,7 @@ const ElectionDiv = ({ control, errors, setValue }: Props) => {
       </Grid>
     </>
   );
-};
+});
+ElectionDiv.displayName = "ElectionDiv";
 
 export default ElectionDiv;

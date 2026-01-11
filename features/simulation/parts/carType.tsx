@@ -1,172 +1,60 @@
-import React, { useEffect, useState } from "react";
+/**
+ * 車種別オプション表示コンポーネント
+ * 選択された車種に応じたオプションフォームを表示
+ */
+import React, { memo, useMemo } from "react";
 import { useWatch } from "react-hook-form";
 import { ChangeCarForm } from "./changeCarForm";
 import { apiData } from "../../api/apiData";
-import {ElectoralClass} from "../calc/calcSimlationParts";
+import { ElectoralClass } from "../calc/calcSimlationParts";
+import { FullFormProps, CarClassType } from "../types/formTypes";
+import { UnitPriceType } from "../../api/type";
 
-interface Props {
-  setValue: any;
-  control: any;
-  errors: any;
-  calcValue: any;
-}
+/**
+ * 車種コードからAPIデータを取得するヘルパー関数
+ */
+const getApiDataByCarType = (
+  carClass: CarClassType,
+  carType: string,
+  electoralClass: ElectoralClass
+): UnitPriceType | null => {
+  // 車クラスと車種に応じたデータを取得
+  // apiDataの構造が複雑なため、型アサーションを使用
+  const classDataMap = apiData[carClass as keyof typeof apiData] as unknown;
+  if (!classDataMap || typeof classDataMap !== "object") return null;
 
-const CarType = ({ setValue, control, errors, calcValue }: Props) => {
-  const [carType, setCarType] = useState<any>("");
-  const getCarClass: "s" | "m" | "l" | "ll" = useWatch({ control, name: "carClass" });
-  const getCarType = useWatch({ control, name: "carType" });
-  const electoralClass: ElectoralClass = useWatch({ control, name: "electoralClass" });
+  const carTypeDataMap = (classDataMap as Record<string, unknown>)[carType];
+  if (!carTypeDataMap || typeof carTypeDataMap !== "object") return null;
 
-  // 車のタイプによって、オプション表示を切り替える
-  useEffect(() => {
-    switch (getCarType[getCarClass]) {
-      // sClass
-      case "heightWagon":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.s.heightWagon[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "boxVan":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.s.boxVan[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "compact":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.s.compact[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-
-      // mClass
-      case "corollaFielder":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.m.corollaFielder[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "shienta":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.m.shienta[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "proBox":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.m.proBox[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-
-      // lClass
-      case "noah":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.l.noah[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "noah_80":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.l.noah_80[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "noah_90":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.l.noah_90[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-
-      case "townAce":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.l.townAce[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-
-      // llClass
-      case "regiusaceAceBasic":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.ll.regiusaceAceBasic[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-      case "regiusaceAceWide":
-        setCarType(
-          <ChangeCarForm
-            apiData={apiData.ll.regiusaceAceWide[electoralClass]}
-            control={control}
-            errors={errors}
-            calcValue={calcValue}
-            setValue={setValue}
-          />,
-        );
-        break;
-
-      default:
-        break;
-    }
-  }, [getCarClass, getCarType, calcValue, electoralClass]);
-
-  return carType;
+  const result = (carTypeDataMap as Record<string, UnitPriceType>)[electoralClass];
+  return result || null;
 };
+
+const CarType = memo(({ setValue, control, errors, calcValue }: FullFormProps) => {
+  const getCarClass = useWatch({ control, name: "carClass" }) as CarClassType;
+  const getCarType = useWatch({ control, name: "carType" });
+  const electoralClass = useWatch({ control, name: "electoralClass" }) as ElectoralClass;
+
+  // 車種に応じたAPIデータをメモ化
+  const carApiData = useMemo(() => {
+    if (!getCarClass || !getCarType || !electoralClass) return null;
+    const currentCarType = getCarType[getCarClass];
+    return getApiDataByCarType(getCarClass, currentCarType, electoralClass);
+  }, [getCarClass, getCarType, electoralClass]);
+
+  // APIデータがない場合は何も表示しない
+  if (!carApiData) return null;
+
+  return (
+    <ChangeCarForm
+      apiData={carApiData}
+      control={control}
+      errors={errors}
+      calcValue={calcValue}
+      setValue={setValue}
+    />
+  );
+});
+CarType.displayName = "CarType";
 
 export default CarType;

@@ -1,4 +1,8 @@
+/**
+ * よくある質問ページ
+ */
 import React, { useState } from "react";
+import Seo from "../component/atoms/Seo";
 import {
   Accordion,
   AccordionDetails,
@@ -145,6 +149,10 @@ const FAQPage = () => {
 
   return (
     <Layout>
+      <Seo
+        title="よくある質問（FAQ）"
+        description="選挙カーレンタルに関するよくある質問。料金・公費負担・車種選び・予約方法などについてお答えします。"
+      />
       <Box>
         {/* ヘッダー */}
         <Box sx={{ mb: 3 }}>

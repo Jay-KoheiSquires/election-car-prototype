@@ -1,4 +1,8 @@
+/**
+ * お問い合わせ・予約ページ
+ */
 import React, { useState, useEffect } from "react";
+import Seo from "../component/atoms/Seo";
 import {
   Alert,
   Box,
@@ -182,6 +186,10 @@ const ContactPage = () => {
 
   return (
     <Layout>
+      <Seo
+        title="お見積り・ご予約"
+        description="選挙カーのレンタル予約・お見積りはこちら。LINEや電話でもお気軽にご相談いただけます。全国対応・公費負担対応。"
+      />
       <Box>
         {/* ヘッダー */}
         <Box sx={{ mb: 3 }}>

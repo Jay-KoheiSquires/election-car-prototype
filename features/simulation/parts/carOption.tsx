@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from "react";
+/**
+ * オプション選択コンポーネント
+ * ワイヤレスマイク、SDカード、保険などのオプション選択UI
+ */
+import React, { useEffect, useState, memo, useMemo } from "react";
 import { Container, Grid, Typography } from "@mui/material";
 import { useWatch } from "react-hook-form";
 import { RhfSelectBox } from "../../../component/molecules/rhfForm";
@@ -8,17 +12,10 @@ import { useQState } from "../../../hooks/library/useQstate";
 import { SendDataType } from "../utils/sendDataType";
 import { apiData } from "../../api/apiData";
 import { PriceConv } from "../../../utils/dataConv";
-import {ElectoralClass} from "../calc/calcSimlationParts";
+import { ElectoralClass } from "../calc/calcSimlationParts";
+import { FormPropsWithCalcValue } from "../types/formTypes";
 
-// todo any!
-interface Props {
-  control: any;
-  errors: any;
-  calcValue: any;
-}
-
-// todo カオス
-const CarOption = ({ control, errors, calcValue }: Props) => {
+const CarOption = memo(({ control, errors, calcValue }: FormPropsWithCalcValue) => {
   const getElectoralClass: ElectoralClass = useWatch({
     control,
     name: "electoralClass",
@@ -256,6 +253,7 @@ const CarOption = ({ control, errors, calcValue }: Props) => {
       </Grid>
     </>
   );
-};
+});
+CarOption.displayName = "CarOption";
 
 export default CarOption;

@@ -1,13 +1,18 @@
+/**
+ * 車種選択コンポーネント群
+ * 各車クラス（S/M/L/LL）の車種選択UIを提供
+ */
 import React from "react";
 import CarToggle from "../../component/organisms/rapForm/carToggle";
 import { PriceConv } from "../../utils/dataConv";
 import { ApiDataType } from "../api/type";
 import { useWatch } from "react-hook-form";
-import {ElectoralClass} from "./calc/calcSimlationParts";
+import { ElectoralClass } from "./calc/calcSimlationParts";
+import { FormControl, FormSetValue } from "./types/formTypes";
 
 interface CarCarProps {
-  control: any;
-  setValue: any;
+  control: FormControl;
+  setValue: FormSetValue;
   apiData: ApiDataType;
 }
 

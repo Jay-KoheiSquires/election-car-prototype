@@ -1,4 +1,8 @@
-import React from "react";
+/**
+ * 車種変更時のオプションフォーム
+ * ライト区分、アンプサイズ、スピーカーなどの設定UI
+ */
+import React, { memo } from "react";
 import { Grid, Typography } from "@mui/material";
 import { RhfRadioButton } from "../../../component/molecules/rhfForm";
 import { SignalLightForm, SwitchSignalLightForm } from "../forms/SignalLightForms";
@@ -7,13 +11,10 @@ import { AmpSizeForm, SwitchAmpSizeForm } from "../forms/ampSizeForms";
 import { useWatch } from "react-hook-form";
 import { TakingPlatform } from "../forms/takingPlatform";
 import { PriceConv } from "../../../utils/dataConv";
+import { FullFormProps } from "../types/formTypes";
 
-interface ChangeCarFormType {
-  control: any;
-  errors: any;
-  setValue: any;
+interface ChangeCarFormType extends FullFormProps {
   apiData: UnitPriceType;
-  calcValue: any;
 }
 
 export const ChangeCarForm = ({
