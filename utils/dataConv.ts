@@ -1,3 +1,9 @@
+/**
+ * データ変換ユーティリティ
+ * コード値（英字キー）を日本語表示用テキストに変換する関数群
+ * フォーム入力値の表示やPDF出力時に使用
+ */
+
 // 選挙区分を日本語に変換
 export const ElectoralClassConv = (value: string): string => {
   switch (value) {

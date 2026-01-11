@@ -1,3 +1,7 @@
+/**
+ * 料金計算の部品関数群
+ * 車クラス・アンプサイズ・ライト区分などの料金取得を担当
+ */
 import { apiData } from "../../api/apiData";
 import { SendDataType } from "../utils/sendDataType";
 import { UnitPriceType } from "../../api/type";
@@ -108,31 +112,3 @@ export const signalLight = (
   }
 };
 
-// // スピーカー
-// const speaker = () => {
-//   switch (inputValue.speaker) {
-//     case "twe":
-//       return apiData.speaker.twe;
-//     case "four":
-//       return apiData.speaker.four;
-//     default:
-//       return 0;
-//   }
-// };
-
-// // 未使用
-// // 議会区分
-// type parliamentClass = "chairman" | "chief";
-//
-// export const parliamentClass = (
-//   inputValue: parliamentClass,
-// ): number => {
-//   switch (inputValue) {
-//     case "chairman": // 議員
-//       return apiData.electoralType.chairman;
-//     case "chief": // 首長
-//       return apiData.electoralType.chief;
-//     default:
-//       return 0;
-//   }
-// };

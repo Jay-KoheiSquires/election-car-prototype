@@ -1,12 +1,17 @@
-// 今日の日付を西暦で返す
-export const ToDayJP = () => {
-  //今日の日付データを変数に格納
+/**
+ * 日付ユーティリティ
+ * 日本語形式の日付フォーマット関数
+ */
+
+/**
+ * 今日の日付を「YYYY年M月D日」形式で返す
+ * @returns 日本語形式の日付文字列（例：2024年1月11日）
+ */
+export const ToDayJP = (): string => {
   const toDay = new Date();
-
-  //年・月・日・曜日を取得する
   const year = toDay.getFullYear();
-  const day = toDay.getDate();
   const month = toDay.getMonth() + 1;
+  const day = toDay.getDate();
 
-  return year + "年" + month + "月" + day + "日 ";
+  return `${year}年${month}月${day}日 `;
 };

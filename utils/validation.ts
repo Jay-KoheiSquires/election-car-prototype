@@ -1,3 +1,8 @@
+/**
+ * バリデーションルール定義
+ * Yupスキーマを使用したフォーム入力値の検証ルール
+ * react-hook-formのresolverと組み合わせて使用
+ */
 import * as yup from "yup";
 
 export const furigana = yup
