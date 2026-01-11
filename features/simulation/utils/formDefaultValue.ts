@@ -13,6 +13,9 @@ export const formDefaultValue: SendDataType = {
     ll: "regiusaceAceBasic",
   },
 
+  // 配送先都道府県（デフォルト: 東京都）
+  deliveryPrefecture: "tokyo",
+
   takingPlatform: false, // 登壇
   signalLight: "outLight", // ライト区分
   ampSize: "150", // アンプサイズ

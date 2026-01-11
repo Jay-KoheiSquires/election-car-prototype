@@ -1,6 +1,7 @@
 import { SendDataType } from "../utils/sendDataType";
 import { apiData } from "../../api/apiData";
 import { ampSize, apiPrices, signalLight } from "./calcSimlationParts";
+import { calcDeliveryFeeRoundTrip, isConsultationArea } from "../../api/deliveryData";
 
 export interface CalcDataType {
   subs: {
@@ -20,8 +21,15 @@ export interface CalcDataType {
     totalInsurancePrice: number;
   };
 
+  // 配送料（往復）
+  delivery: {
+    fee: number;              // 配送料金（往復）
+    isConsultation: boolean;  // 要相談エリアかどうか
+  };
+
   subTotalPrice: number;
   optionTotalPrice: number;
+  deliveryPrice: number;      // 配送料合計
   totalPrice: number;
 }
 
@@ -93,9 +101,17 @@ const CalcSimulation = (inputValue: SendDataType): CalcDataType => {
     totalMikePrice + sdPrice + incomePrice + handSpeakerPrice + bluetoothUnit + totalInsurancePrice;
 
   //
-  // 合計金額 ... 小計 ＋ オプション
+  // 配送料（往復）
   //
-  const totalPrice = subTotalPrice + optionTotalPrice;
+  const deliveryPrefecture = inputValue?.deliveryPrefecture || "";
+  const deliveryFee = calcDeliveryFeeRoundTrip(deliveryPrefecture);
+  const deliveryIsConsultation = isConsultationArea(deliveryPrefecture);
+  const deliveryPrice = deliveryFee;
+
+  //
+  // 合計金額 ... 小計 ＋ オプション ＋ 配送料
+  //
+  const totalPrice = subTotalPrice + optionTotalPrice + deliveryPrice;
 
   return {
     subs: {
@@ -113,8 +129,13 @@ const CalcSimulation = (inputValue: SendDataType): CalcDataType => {
       insurancePrice: insurancePrice,
       totalInsurancePrice: totalInsurancePrice,
     },
+    delivery: {
+      fee: deliveryFee,
+      isConsultation: deliveryIsConsultation,
+    },
     subTotalPrice: subTotalPrice,
     optionTotalPrice: optionTotalPrice,
+    deliveryPrice: deliveryPrice,
     totalPrice: totalPrice,
   };
 };

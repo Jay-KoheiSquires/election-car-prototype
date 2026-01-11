@@ -13,6 +13,9 @@ export interface SendDataType {
     ll: "regiusaceAceBasic" | "regiusaceAceWide";
   };
 
+  // 配送先都道府県コード
+  deliveryPrefecture: string;
+
   takingPlatform: boolean;
   signalLight: "outLight" | "inLight"; // ライト区分
   ampSize: "60" | "150" | "300" | "600"; // アンプサイズ

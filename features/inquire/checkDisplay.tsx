@@ -32,6 +32,7 @@ import { SendDataType } from "../simulation/utils/sendDataType";
 import { CalcDataType } from "../simulation/calc/calcSimulation";
 import { useRouter } from "next/router";
 import {useLeavePageConfirmation} from "../../hooks/useLeavePageConfirmation";
+import { prefCd } from "../../constants/preCd";
 
 
 
@@ -119,9 +120,22 @@ export const CheckDisplay = () => {
         insuranceDays: sendData?.insurance ? DayConv(sendData?.insuranceDays) : DayConv(0), // 保険日数
         bodyRapping: OptionConv(sendData?.bodyRapping), // ボディラッピング
 
+        // 配送先
+        deliveryPrefecture: prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択",
+        deliveryFee: calcData?.delivery?.isConsultation
+          ? "要相談"
+          : calcData?.delivery?.fee === 0
+          ? "無料"
+          : PriceTaxConv(calcData?.deliveryPrice),
+
         //金額
         subTotalPrice: PriceTaxConv(calcData?.subTotalPrice),
         optionTotalPrice: PriceTaxConv(calcData?.optionTotalPrice),
+        deliveryPrice: calcData?.delivery?.isConsultation
+          ? "要相談"
+          : calcData?.delivery?.fee === 0
+          ? "無料"
+          : PriceTaxConv(calcData?.deliveryPrice),
         totalPrice: PriceTaxConv(calcData?.totalPrice),
       };
 
@@ -291,6 +305,35 @@ export const CheckDisplay = () => {
             )}
             <ConfLabel label={"ボディラッピング"} value={OptionConv(sendData?.bodyRapping)} />
             <ConfLabel label={"オプション金額"} value={PriceTaxConv(calcData?.optionTotalPrice)} />
+          </Grid>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider sx={{ mb: 2, mt: 2 }} />
+        </Grid>
+
+        {/**/}
+        {/* 配送料 */}
+        {/**/}
+        <Grid xs={12} sx={{ pt: 2 }}>
+          <Typography>配送料</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Grid container>
+            <ConfLabel
+              label={"配送先"}
+              value={prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択"}
+            />
+            <ConfLabel
+              label={"配送料（往復）"}
+              value={
+                calcData?.delivery?.isConsultation
+                  ? "要相談"
+                  : calcData?.delivery?.fee === 0
+                  ? "無料"
+                  : PriceTaxConv(calcData?.deliveryPrice)
+              }
+            />
           </Grid>
         </Grid>
 

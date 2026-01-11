@@ -27,6 +27,7 @@ import {
   SpeakerConv,
   WattConv,
 } from "../utils/dataConv";
+import { prefCd } from "../constants/preCd";
 //
 // フォント定義
 //
@@ -148,6 +149,18 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
                       </TableCell>
                       <TableCell width={"150"} textAlign={"right"}>
                         {` ¥${calcData?.optionTotalPrice?.toLocaleString()}（税込）`}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell backgroundColor={"#E4E4E4"} width={"150"}>
+                        配送料（往復）
+                      </TableCell>
+                      <TableCell width={"150"} textAlign={"right"}>
+                        {calcData?.delivery?.isConsultation
+                          ? "要相談"
+                          : calcData?.delivery?.fee === 0
+                          ? "無料"
+                          : ` ¥${calcData?.deliveryPrice?.toLocaleString()}（税込）`}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -282,6 +295,56 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
                       }}
                     >
                       {` ¥${calcData?.optionTotalPrice?.toLocaleString()}（税込）`}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </View>
+
+            {/* 配送料テーブル*/}
+            <View style={{ paddingBottom: 5 }}></View>
+            <SimpleText size={"large"}>【配送料】</SimpleText>
+            <View
+              style={{
+                marginRight: 25,
+                marginLeft: 25,
+                marginTop: 5,
+              }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>配送先</TableCell>
+                    <TableCell width={"250"}>金額（往復）</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      {prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択"}
+                    </TableCell>
+                    <TableCell width={"250"} textAlign={"right"}>
+                      {calcData?.delivery?.isConsultation
+                        ? "要相談"
+                        : calcData?.delivery?.fee === 0
+                        ? "無料"
+                        : ` ¥${calcData?.deliveryPrice?.toLocaleString()}（税込）`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell border={false}></TableCell>
+                    <TableCell
+                      width={"250"}
+                      textAlign={"right"}
+                      style={{
+                        backgroundColor: "#E4E4E4",
+                      }}
+                    >
+                      {calcData?.delivery?.isConsultation
+                        ? "要相談"
+                        : calcData?.delivery?.fee === 0
+                        ? "無料"
+                        : ` ¥${calcData?.deliveryPrice?.toLocaleString()}（税込）`}
                     </TableCell>
                   </TableRow>
                 </TableBody>

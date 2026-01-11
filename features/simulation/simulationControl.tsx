@@ -27,6 +27,7 @@ import PriceComparison from "./parts/priceComparison";
 import RecommendedCar from "./parts/recommendedCar";
 import SharePanel from "./parts/sharePanel";
 import ChatBot from "./parts/chatBot";
+import DeliveryArea from "./parts/deliveryArea";
 
 import CalcSimulation, { CalcDataType } from "./calc/calcSimulation";
 import Layout from "../../component/templates/layout";
@@ -126,6 +127,9 @@ export const SimulationControl = () => {
         <form>
           {/* 選挙区分 */}
           <ElectionDiv control={control} errors={errors} setValue={setValue} />
+
+          {/* 配送先エリア選択 */}
+          <DeliveryArea control={control} errors={errors} />
 
           {/* NEW: 車両ギャラリー */}
           <Grid item xs={12} sx={{ mb: 2 }}>
