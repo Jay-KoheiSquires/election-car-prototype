@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Paper, Grid, Button, Tabs, Tab } from "@mui/material";
+import { Box, Typography, Paper, Grid, Button, Tabs, Tab, useMediaQuery, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MapIcon from "@mui/icons-material/Map";
 import ListIcon from "@mui/icons-material/List";
@@ -136,7 +136,9 @@ const mapPositions: { [key: string]: { row: number; col: number } } = {
 mapPositions["44"] = { row: 10, col: 0.5 };
 
 const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
-  const [tabValue, setTabValue] = useState(0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [tabValue, setTabValue] = useState(isMobile ? 1 : 0); // モバイルはリスト(1)、PCは地図(0)
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   const getRegionColor = (prefCode: string) => {
@@ -169,8 +171,9 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
           gridTemplateColumns: "repeat(10, 1fr)",
           gridTemplateRows: "repeat(14, 1fr)",
           gap: 0.3,
-          aspectRatio: "10/14",
+          aspectRatio: { xs: "10/10", sm: "10/14" },
           maxWidth: 350,
+          maxHeight: { xs: 200, sm: 350 },
           mx: "auto",
         }}
       >
@@ -192,7 +195,7 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: { xs: "0.5rem", sm: "0.6rem" },
+                fontSize: { xs: "0.6rem", sm: "0.7rem" },
                 fontWeight: "bold",
                 borderRadius: 0.5,
                 cursor: "pointer",
@@ -203,7 +206,7 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
                   zIndex: 10,
                   boxShadow: 2,
                 },
-                minHeight: { xs: 20, sm: 24 },
+                minHeight: { xs: 18, sm: 24 },
               }}
             >
               {pref.name.replace(/県|府|都|道/, "")}

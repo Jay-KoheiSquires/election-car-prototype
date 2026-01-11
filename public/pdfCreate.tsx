@@ -20,12 +20,14 @@ import { CalcDataType } from "../features/simulation/calc/calcSimulation";
 import { domainLabel } from "../utils/domainLabel";
 import {
   CarTypeConv,
+  CarClassConv,
   DayConv,
   PiecesConv,
   PriceTaxConv,
   SignalLightConv,
   SpeakerConv,
   WattConv,
+  ElectoralClassConv,
 } from "../utils/dataConv";
 import { prefCd } from "../constants/preCd";
 //
@@ -50,6 +52,17 @@ interface QuoteProps {
 }
 
 export const Quote = ({ sendData, calcData }: QuoteProps) => {
+  // 選挙情報
+  const electionInfo = {
+    type: ElectoralClassConv(sendData?.electoralClass) || "未選択",
+    area: prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択",
+  };
+
+  // 公費負担概算（7日間を仮定）
+  const estimatedDays = 7;
+  const publicSubsidyPerDay = 16100;
+  const estimatedPublicSubsidy = publicSubsidyPerDay * estimatedDays;
+
   // 車両金額詳細
   const bodyValues: {
     label: string;
@@ -122,6 +135,18 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
           <View style={styles.underline5} />
           {/* メインコンテンツ */}
           <View style={styles.main}>
+            {/* 選挙情報セクション */}
+            <View style={{ backgroundColor: "#FFF0F0", padding: 8, marginBottom: 10, borderRadius: 4 }}>
+              <Grid flexDirection={"row"}>
+                <GridItem flexGrow={1}>
+                  <SimpleText size={"normal"} bold>選挙区分：{electionInfo.type}</SimpleText>
+                </GridItem>
+                <GridItem flexGrow={1}>
+                  <SimpleText size={"normal"} bold>選挙エリア：{electionInfo.area}</SimpleText>
+                </GridItem>
+              </Grid>
+            </View>
+
             <Grid flexDirection={"row"} style={{ alignItems: "center" }}>
               <GridItem flexGrow={5}>
                 <Table>
@@ -129,10 +154,9 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
                     <TableRow>
                       <TableCell textAlign={"left"} width={"300"} border={false}>
                         <SimpleText size={"large"}>
-                          {`車両名:　${CarTypeConv(sendData?.carType[sendData?.carClass])}`}
+                          {`車両名:　${CarTypeConv(sendData?.carType[sendData?.carClass])}（${CarClassConv(sendData?.carClass)}）`}
                         </SimpleText>
                       </TableCell>
-                      {/*<TableCell width={"150"} border={false}></TableCell>*/}
                     </TableRow>
 
                     <TableRow>
@@ -164,11 +188,27 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell backgroundColor={"#E4E4E4"} width={"150"} bold>
+                      <TableCell backgroundColor={"#FFE4E4"} width={"150"} bold>
                         合計金額
                       </TableCell>
-                      <TableCell width={"150"} bold textAlign={"right"}>
+                      <TableCell width={"150"} bold textAlign={"right"} style={{ backgroundColor: "#FFE4E4" }}>
                         {` ¥${calcData?.totalPrice?.toLocaleString()}（税込）`}
+                      </TableCell>
+                    </TableRow>
+                    {/* 公費負担額を目立たせる */}
+                    <TableRow>
+                      <TableCell backgroundColor={"#E4F4E4"} width={"150"} bold>
+                        公費負担概算
+                      </TableCell>
+                      <TableCell width={"150"} bold textAlign={"right"} style={{ backgroundColor: "#E4F4E4" }}>
+                        {`¥${estimatedPublicSubsidy.toLocaleString()}〜`}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell border={false} width={"300"}>
+                        <SimpleText size={"small"} style={{ color: "#666" }}>
+                          ※公費負担は16,100円×レンタル日数（{estimatedDays}日間で試算）
+                        </SimpleText>
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -370,9 +410,12 @@ export const Quote = ({ sendData, calcData }: QuoteProps) => {
                   }
                 </SimpleText>
 
-                <SimpleText bold>■ 公費は別途請求</SimpleText>
+                <SimpleText bold>■ 公費負担について</SimpleText>
                 <SimpleText bold style={{ color: "red" }}>
-                  {"　レンタカー代（16,100円／日数）は別途当社から選管にご請求させて頂きます。"}
+                  {"　レンタカー代（16,100円×日数）は別途当社から選管にご請求させて頂きます。"}
+                </SimpleText>
+                <SimpleText style={{ color: "blue" }}>
+                  {`　→ 参考：7日間の場合 ¥${estimatedPublicSubsidy.toLocaleString()}（公費負担概算）`}
                 </SimpleText>
                 <SimpleText style={{ color: "blue" }}>
                   {"　＊公費請求額は、供託物の没収に該当する場合は候補者様に請求いたします。"}

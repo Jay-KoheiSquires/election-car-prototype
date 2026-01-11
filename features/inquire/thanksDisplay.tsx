@@ -7,19 +7,16 @@ import { Quote } from "../../public/pdfCreate";
 import { clearQStateStorage, useQState } from "../../hooks/library/useQstate";
 import { CalcDataType } from "../simulation/calc/calcSimulation";
 import { SendDataType } from "../simulation/utils/sendDataType";
-import {useLeavePageConfirmation} from "../../hooks/useLeavePageConfirmation";
 
 export const ThanksDisplay = () => {
   const router = useRouter();
   const [sendData] = useQState<SendDataType>(["sendData"]);
   const [calcData] = useQState<CalcDataType>(["calcData"]);
-  const [stepper, setStepper] = useQState<number>(["stepper"]);
 
   // hookを使用して、PDFDownloadLinkがSSRを実行しないようにする
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
-    setStepper(2)
     // 完了画面表示時に保存データをクリア
     clearQStateStorage([
       ["inputData"],

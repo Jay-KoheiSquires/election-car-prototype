@@ -48,15 +48,19 @@ export const InquireControl = ({children}:InquireControlProps) => {
               <Container maxWidth="sm">
                 <Stepper activeStep={stepper}>
                   <Step>
-                    <StepButton>入力</StepButton>
+                    <StepButton>選挙情報</StepButton>
+                  </Step>
+
+                  <Step>
+                    <StepButton>お客様情報</StepButton>
+                  </Step>
+
+                  <Step>
+                    <StepButton>納車・引取</StepButton>
                   </Step>
 
                   <Step>
                     <StepButton>確認</StepButton>
-                  </Step>
-
-                  <Step>
-                    <StepButton>完了</StepButton>
                   </Step>
                 </Stepper>
               </Container>

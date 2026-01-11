@@ -110,36 +110,39 @@ export const SimulationControl = () => {
           <Divider sx={{ mb: 2, mt: 2 }} />
         </Grid>
 
-        {/* NEW: おすすめ車種提案 */}
-        {showRecommendation && (
-          <Grid item xs={12} sx={{ mb: 2 }}>
-            <RecommendedCar
-              electoralClass={electoralClass}
-              onSelect={(carClassValue, carType) => {
-                setValue("carClass", carClassValue);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                setValue(`carType.${carClassValue}` as any, carType as any);
-              }}
-            />
-          </Grid>
-        )}
-
         <form>
           {/* 選挙区分 */}
           <ElectionDiv control={control} errors={errors} setValue={setValue} />
 
-          {/* 配送先エリア選択 */}
-          <DeliveryArea control={control} errors={errors} />
+          {/* サイズ・車両タイプ */}
+          <CarClass setValue={setValue} control={control} errors={errors} calcValue={calcData} />
 
-          {/* NEW: 車両ギャラリー */}
+          {/* おすすめ車種提案 */}
+          {showRecommendation && (
+            <Grid item xs={12} sx={{ mb: 2 }}>
+              <RecommendedCar
+                electoralClass={electoralClass}
+                onSelect={(carClassValue, carType) => {
+                  setValue("carClass", carClassValue);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  setValue(`carType.${carClassValue}` as any, carType as any);
+                }}
+              />
+            </Grid>
+          )}
+
+          {/* 車両ギャラリー */}
           <Grid item xs={12} sx={{ mb: 2 }}>
             <CarGallery carClass={carClass} />
           </Grid>
 
-          {/* サイズ・車両タイプ */}
-          <CarClass setValue={setValue} control={control} errors={errors} calcValue={calcData} />
+          {/* オプション選択 */}
+          <CarOption control={control} errors={errors} calcValue={calcData} />
 
-          {/* NEW: 料金比較表 */}
+          {/* 配送先エリア選択 */}
+          <DeliveryArea control={control} errors={errors} />
+
+          {/* 料金比較表 */}
           <Grid item xs={12} sx={{ mb: 2 }}>
             <PriceComparison
               electoralClass={electoralClass}
@@ -148,10 +151,7 @@ export const SimulationControl = () => {
             />
           </Grid>
 
-          {/* オプション選択 */}
-          <CarOption control={control} errors={errors} calcValue={calcData} />
-
-          {/* NEW: 共有パネル（QRコード・LINE・メール） */}
+          {/* 共有パネル（QRコード・LINE・メール） */}
           <Grid item xs={12} sx={{ mt: 2, mb: 2 }}>
             <SharePanel sendData={sendData} calcData={calcData} />
           </Grid>

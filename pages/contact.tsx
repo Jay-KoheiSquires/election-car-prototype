@@ -27,6 +27,11 @@ import {
   Step,
   StepLabel,
   Stepper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -63,6 +68,9 @@ import {
   OptionConv,
   DayConv,
   PriceTaxConv,
+  PriceConv,
+  LocationConv,
+  PiecesConv,
 } from "../utils/dataConv";
 import { prefCd } from "../constants/preCd";
 
@@ -857,30 +865,379 @@ const ContactPage = () => {
                 </Typography>
               </Alert>
 
+              {/* お見積りサマリー */}
+              {calcData && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: "primary.light" }}>
+                  <Typography variant="caption" fontWeight="bold" color="primary.dark" gutterBottom sx={{ display: "block" }}>
+                    お見積りサマリー
+                  </Typography>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+                    <Typography variant="body2" fontWeight="bold">
+                      {CarClassConv(sendData?.carClass || "")} / {CarTypeConv(sendData?.carType?.[sendData?.carClass] || "")}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <Typography variant="caption" color="text.secondary">合計金額（税込）</Typography>
+                    <Typography variant="h6" fontWeight="bold" color="primary.dark">
+                      {PriceTaxConv(calcData?.totalPrice)}
+                    </Typography>
+                  </Box>
+                  {watch("deliveryDate") && watch("returnDate") && (
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+                      <Typography variant="caption" color="text.secondary">レンタル期間</Typography>
+                      <Typography variant="body2">
+                        {calcRentalDays(
+                          moment(watch("deliveryDate")).format("YYYY/MM/DD HH:mm"),
+                          moment(watch("returnDate")).format("YYYY/MM/DD HH:mm")
+                        )}日間
+                      </Typography>
+                    </Box>
+                  )}
+                  {watch("deliveryDate") && watch("returnDate") && (() => {
+                    const days = calcRentalDays(
+                      moment(watch("deliveryDate")).format("YYYY/MM/DD HH:mm"),
+                      moment(watch("returnDate")).format("YYYY/MM/DD HH:mm")
+                    );
+                    const subsidy = calcPublicSubsidy(days);
+                    return subsidy > 0 ? (
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+                        <Typography variant="caption" color="text.secondary">公費負担額参考</Typography>
+                        <Typography variant="body2" color="success.main">
+                          {formatPriceWithTax(subsidy)}
+                        </Typography>
+                      </Box>
+                    ) : null;
+                  })()}
+                </Paper>
+              )}
+
+              {/* 料金内訳 */}
+              {calcData && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                  <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block", mb: 1 }}>
+                    料金内訳
+                  </Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">車両基本料金</Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">{PriceConv(calcData?.subTotalPrice)}</Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">オプション小計</Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">{PriceConv(calcData?.optionTotalPrice)}</Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">配送料（往復）</Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 0.5, border: 0 }}>
+                            <Typography variant="caption">
+                              {calcData?.delivery?.isConsultation
+                                ? "要相談"
+                                : calcData?.delivery?.fee === 0
+                                ? "無料"
+                                : PriceConv(calcData?.deliveryPrice)}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+                          <TableCell sx={{ py: 1, border: 0 }}>
+                            <Typography variant="body2" fontWeight="bold">合計（税込）</Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 1, border: 0 }}>
+                            <Typography variant="body2" fontWeight="bold" color="primary">
+                              {PriceTaxConv(calcData?.totalPrice)}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              )}
+
+              {/* 選挙情報 */}
               <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-                <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom>
+                <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
                   選挙情報
                 </Typography>
-                <Typography variant="body2">
-                  {electionTypes.find((t) => t.value === electionType)?.label || "未選択"} / {selectedPrefName || "未選択"}
-                </Typography>
+                <Grid container spacing={1}>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">選挙種別</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">
+                      {electionTypes.find((t) => t.value === electionType)?.label || "未選択"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">選挙区</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">{selectedPrefName || "未選択"}</Typography>
+                  </Grid>
+                  {watch("notificationDate") && (
+                    <>
+                      <Grid item xs={4}>
+                        <Typography variant="caption" color="text.secondary">告示日</Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="body2">
+                          {moment(watch("notificationDate")).format("YYYY/MM/DD")}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
               </Paper>
 
+              {/* お客様情報 */}
               <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-                <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom>
+                <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
                   お客様情報
                 </Typography>
-                <Typography variant="body2">
-                  {watch("name")} 様
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {watch("tel")} / {watch("email")}
-                </Typography>
+                <Grid container spacing={1}>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">お名前</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">{watch("name")} 様</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">フリガナ</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">{watch("furigana")}</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">電話番号</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">{watch("tel")}</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">メール</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">{watch("email")}</Typography>
+                  </Grid>
+                  {watch("address") && (
+                    <>
+                      <Grid item xs={4}>
+                        <Typography variant="caption" color="text.secondary">住所</Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="body2">{watch("postCode")} {watch("address")}</Typography>
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
               </Paper>
 
-              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-                ※ 送信後、担当者より2営業日以内にご連絡いたします。
-              </Typography>
+              {/* 選挙事務所情報（入力があれば表示） */}
+              {(watch("officeAddress") || watch("officeTel")) && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                  <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
+                    選挙事務所情報
+                  </Typography>
+                  <Grid container spacing={1}>
+                    {watch("officeAddress") && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">住所</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{watch("officePostCode")} {watch("officeAddress")}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                    {watch("officeTel") && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">電話番号</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{watch("officeTel")}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                    {watch("contactPerson") && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">担当者</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{watch("contactPerson")}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* 納車・引取情報 */}
+              <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
+                  納車・引取情報
+                </Typography>
+                <Grid container spacing={1}>
+                  {/* 納車 */}
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">納車日時</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">
+                      {watch("deliveryDate") ? moment(watch("deliveryDate")).format("YYYY/MM/DD HH:mm") : "未設定"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">納車場所</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">
+                      {LocationConv(watch("deliveryLocation"))}
+                      {watch("deliveryLocation") === "other" && watch("deliveryOther") && `: ${watch("deliveryOther")}`}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                  </Grid>
+
+                  {/* 引取 */}
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">引取日時</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">
+                      {watch("returnDate") ? moment(watch("returnDate")).format("YYYY/MM/DD HH:mm") : "未設定"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="caption" color="text.secondary">引取場所</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2">
+                      {LocationConv(watch("returnLocation"))}
+                      {watch("returnLocation") === "other" && watch("returnOther") && `: ${watch("returnOther")}`}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+
+              {/* 車両・オプション情報（シミュレーションデータがある場合） */}
+              {sendData && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                  <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
+                    レンタル車両情報
+                  </Typography>
+                  <Grid container spacing={1}>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" color="text.secondary">車種クラス</Typography>
+                    </Grid>
+                    <Grid item xs={8}>
+                      <Typography variant="body2">{CarClassConv(sendData?.carClass || "")}</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" color="text.secondary">車種</Typography>
+                    </Grid>
+                    <Grid item xs={8}>
+                      <Typography variant="body2">{CarTypeConv(sendData?.carType?.[sendData?.carClass] || "")}</Typography>
+                    </Grid>
+                    {sendData?.signalLight && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">看板タイプ</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{SignalLightConv(sendData?.signalLight)}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                    {sendData?.ampSize && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">アンプ</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{WattConv(sendData?.ampSize)}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                    {sendData?.speaker && (
+                      <>
+                        <Grid item xs={4}>
+                          <Typography variant="caption" color="text.secondary">スピーカー</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                          <Typography variant="body2">{SpeakerConv(sendData?.speaker)}</Typography>
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+
+                  {/* オプション（選択されている場合のみ表示） */}
+                  {(sendData?.wirelessMike || sendData?.sd || sendData?.wirelessIncome || sendData?.handSpeaker || sendData?.bluetoothUnit || sendData?.insurance || sendData?.bodyRapping) && (
+                    <>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography variant="caption" fontWeight="bold" color="text.secondary" gutterBottom sx={{ display: "block" }}>
+                        オプション
+                      </Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {sendData?.wirelessMike && (
+                          <Chip size="small" label={`ワイヤレスマイク ${PiecesConv(sendData?.wirelessMikeNumber)}`} variant="outlined" />
+                        )}
+                        {sendData?.sd && (
+                          <Chip size="small" label="SDカード" variant="outlined" />
+                        )}
+                        {sendData?.wirelessIncome && (
+                          <Chip size="small" label="ワイヤレスインカム" variant="outlined" />
+                        )}
+                        {sendData?.handSpeaker && (
+                          <Chip size="small" label="ハンドスピーカー" variant="outlined" />
+                        )}
+                        {sendData?.bluetoothUnit && (
+                          <Chip size="small" label="Bluetoothユニット" variant="outlined" />
+                        )}
+                        {sendData?.insurance && (
+                          <Chip size="small" label={`保険 ${DayConv(sendData?.insuranceDays)}`} variant="outlined" />
+                        )}
+                        {sendData?.bodyRapping && (
+                          <Chip size="small" label="ボディラッピング" variant="outlined" />
+                        )}
+                      </Box>
+                    </>
+                  )}
+                </Paper>
+              )}
+
+              {/* 備考（入力があれば表示） */}
+              {watch("notes") && (
+                <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+                  <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
+                    備考・ご要望
+                  </Typography>
+                  <Typography variant="body2">{watch("notes")}</Typography>
+                </Paper>
+              )}
+
+              {/* 注意事項 */}
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <Typography variant="caption">
+                  送信後、担当者より<strong>2営業日以内</strong>にご連絡いたします。
+                  お急ぎの場合はLINEまたはお電話でお問い合わせください。
+                </Typography>
+              </Alert>
             </Box>
           </Collapse>
 
