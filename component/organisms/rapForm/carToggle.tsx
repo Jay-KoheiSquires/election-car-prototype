@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useGetWindowSize } from "../../../hooks/useGetWindowSize";
+import { getImagePath } from "../../../utils/basePath";
 
 interface CarToggleProps {
   control: any;
@@ -110,7 +111,7 @@ const CarToggle = ({ control, name, options }: CarToggleProps) => {
                   <CardMedia>
                     <Box sx={{ width: "100%", pt: 1 }}>
                       <img
-                        src={option.image.startsWith('/') ? option.image : `/${option.image}`}
+                        src={getImagePath(option.image)}
                         style={{
                           height: noSmartPhone ? 180 : 140,
                           width: "100%",
