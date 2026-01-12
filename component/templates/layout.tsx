@@ -13,6 +13,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useGetWindowSize } from "../../hooks/useGetWindowSize";
 
+// GitHub Pages用のbasePath
+const basePath = process.env.NODE_ENV === 'production' ? '/election-car-prototype' : '';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -58,7 +61,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
             <Link href="https://senkyocar-labo.com/" style={{ display: "flex", alignItems: "center" }}>
               <Image
-                src="/image/common/logo.png"
+                src={`${basePath}/image/common/logo.png`}
                 alt="選挙カーLABo."
                 width={140}
                 height={24}
