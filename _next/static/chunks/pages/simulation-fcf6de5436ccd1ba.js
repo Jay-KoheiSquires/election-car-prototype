@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[539],{3344:function(n,_,u){(window.__NEXT_P=window.__NEXT_P||[]).push(["/simulation",function(){return u(4536)}])}},function(n){n.O(0,[439,111,191,834,711,777,19,116,724,797,645,536,774,888,179],function(){return n(n.s=3344)}),_N_E=n.O()}]);
