@@ -20,7 +20,7 @@ export default function useFetch() {
         // withCredentials: true,
         // data: body,
       }).then((res: any) => {
-        return res;
+        return res.data;
       });
     } catch (e: unknown) {
       const res = (e as AxiosError).response;

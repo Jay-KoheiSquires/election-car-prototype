@@ -41,8 +41,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Layout from "../component/templates/layout";
-import JapanMap from "../features/inquire/parts/japanMap";
-import RhfDatePicker from "../component/molecules/rhfForm/rhfDatePicker";
 import RhfDateTimePicker from "../component/molecules/rhfForm/rhfDateTimePicker";
 import Link from "next/link";
 import { init, send } from "emailjs-com";
@@ -86,7 +84,6 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import HowToVoteIcon from "@mui/icons-material/HowToVote";
 import CampaignIcon from "@mui/icons-material/Campaign";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import { useGetZipAddress } from "../hooks/api/useGetZipAddress";
@@ -123,18 +120,17 @@ const electionTypes = [
   },
 ];
 
-// ステップ定義
-const steps = ["選挙情報", "お客様情報", "納車・引取", "確認"];
+// ステップ定義（シミュレーションで選挙情報は入力済み）
+const steps = ["お客様情報", "納車・引取", "確認"];
 
 const ContactPage = () => {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedPref, setSelectedPref] = useState("");
-  const [selectedPrefName, setSelectedPrefName] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [zip, setZip] = useState("");
   const [zipTarget, setZipTarget] = useState<"personal" | "office">("personal");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitClicked, setSubmitClicked] = useState(false); // 送信ボタンが明示的にクリックされたか
 
   // シミュレーションからのデータ
   const [sendData] = useQState<SendDataType>(["sendData"]);
@@ -144,26 +140,99 @@ const ContactPage = () => {
 
   // フォームバリデーション
   const schema = yup.object().shape({
-    electionType: yup.string().required("選挙種別を選択してください"),
+    // 基本情報（必須）
     name: yup.string().required("お名前は必須です"),
-    furigana: yup.string().required("フリガナは必須です"),
-    tel: yup.string().required("電話番号は必須です"),
-    email: yup.string().email("正しいメールアドレスを入力してください").required("メールアドレスは必須です"),
-  });
+    furigana: yup
+      .string()
+      .required("フリガナは必須です")
+      .matches(/^[ァ-ヶー\s]+$/, "カタカナで入力してください"),
+    tel: yup
+      .string()
+      .required("電話番号は必須です")
+      .matches(/^[\d-]+$/, "電話番号の形式が正しくありません"),
+    email: yup
+      .string()
+      .required("メールアドレスは必須です")
+      .email("正しいメールアドレスを入力してください"),
+
+    // 住所（双方向: どちらか入力したら両方必須）
+    postCode: yup.string().when("address", {
+      is: (val: string) => val && val.length > 0,
+      then: (schema) =>
+        schema
+          .required("住所を入力した場合、郵便番号も必須です")
+          .matches(/^\d{3}-?\d{4}$/, "郵便番号の形式が正しくありません"),
+      otherwise: (schema) =>
+        schema.test("postCode-format", "郵便番号の形式が正しくありません", (val) =>
+          !val || /^\d{3}-?\d{4}$/.test(val)
+        ),
+    }),
+    address: yup.string().when("postCode", {
+      is: (val: string) => val && val.length > 0,
+      then: (schema) => schema.required("郵便番号を入力した場合、住所も必須です"),
+    }),
+
+    // 事務所情報（双方向 + 納車/引取先が事務所の場合）
+    officePostCode: yup.string().when(["officeAddress", "deliveryLocation", "returnLocation"], {
+      is: (officeAddress: string, deliveryLoc: string, returnLoc: string) =>
+        (officeAddress && officeAddress.length > 0) || deliveryLoc === "office" || returnLoc === "office",
+      then: (schema) =>
+        schema
+          .required("事務所郵便番号は必須です")
+          .matches(/^\d{3}-?\d{4}$/, "郵便番号の形式が正しくありません"),
+      otherwise: (schema) =>
+        schema.test("office-postCode-format", "郵便番号の形式が正しくありません", (val) =>
+          !val || /^\d{3}-?\d{4}$/.test(val)
+        ),
+    }),
+    officeAddress: yup.string().when(["officePostCode", "deliveryLocation", "returnLocation"], {
+      is: (officePostCode: string, deliveryLoc: string, returnLoc: string) =>
+        (officePostCode && officePostCode.length > 0) || deliveryLoc === "office" || returnLoc === "office",
+      then: (schema) => schema.required("事務所住所は必須です"),
+    }),
+    officeTel: yup.string(),
+    contactPerson: yup.string(),
+    preferredContact: yup.string(),
+
+    // 納車情報
+    deliveryDate: yup.date().required("納車日時は必須です").typeError("納車日時を選択してください"),
+    deliveryLocation: yup.string().required("納車場所は必須です"),
+    deliveryOther: yup.string().when("deliveryLocation", {
+      is: "other",
+      then: (schema) => schema.required("納車先を入力してください"),
+    }),
+
+    // 引取情報
+    returnDate: yup
+      .date()
+      .required("引取日時は必須です")
+      .typeError("引取日時を選択してください")
+      .min(yup.ref("deliveryDate"), "引取日時は納車日時より後にしてください"),
+    returnLocation: yup.string().required("引取場所は必須です"),
+    returnOther: yup.string().when("returnLocation", {
+      is: "other",
+      then: (schema) => schema.required("引取先を入力してください"),
+    }),
+
+    // 備考
+    notes: yup.string(),
+  }, [
+    // 循環参照を避けるためのペア定義
+    ["postCode", "address"],
+    ["officePostCode", "officeAddress"],
+  ]);
 
   const {
     control,
     handleSubmit,
     setValue,
     watch,
+    trigger,
     formState: { errors },
   } = useForm({
+    resolver: yupResolver(schema),
+    mode: "onBlur", // フォーカスが外れた時にバリデーション
     defaultValues: {
-      electionType: "",
-      parliamentType: "chairman",
-      prefCode: "",
-      prefName: "",
-      notificationDate: null as Date | null,
       name: "",
       furigana: "",
       postCode: "",
@@ -175,17 +244,16 @@ const ContactPage = () => {
       officeTel: "",
       contactPerson: "",
       preferredContact: "phone",
-      deliveryDate: null as Date | null,
+      deliveryDate: undefined as Date | undefined,
       deliveryLocation: "office",
       deliveryOther: "",
-      returnDate: null as Date | null,
+      returnDate: undefined as Date | undefined,
       returnLocation: "office",
       returnOther: "",
       notes: "",
     },
   });
 
-  const electionType = watch("electionType");
   const deliveryLocation = watch("deliveryLocation");
   const returnLocation = watch("returnLocation");
 
@@ -206,14 +274,21 @@ const ContactPage = () => {
     }
   }, [address, zipTarget, setValue, zip]);
 
-  const handlePrefSelect = (code: string, name: string) => {
-    setSelectedPref(code);
-    setSelectedPrefName(name);
-    setValue("prefCode", code);
-    setValue("prefName", name);
+  // 各ステップでバリデーションするフィールド
+  // ステップ0: お客様情報（基本情報 + 住所）
+  // ステップ1: 納車・引取（納車/引取場所で事務所を選択した場合、事務所住所も検証）
+  const stepFields: Record<number, string[]> = {
+    0: ["name", "furigana", "tel", "email", "postCode", "address"],
+    1: ["deliveryDate", "deliveryLocation", "deliveryOther", "returnDate", "returnLocation", "returnOther", "officePostCode", "officeAddress"],
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // 現在のステップのフィールドをバリデーション
+    const fieldsToValidate = stepFields[activeStep];
+    if (fieldsToValidate) {
+      const isValid = await trigger(fieldsToValidate as any);
+      if (!isValid) return; // バリデーションエラーがあれば進まない
+    }
     setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
@@ -222,8 +297,22 @@ const ContactPage = () => {
   };
 
   const onSubmit = (data: any) => {
+    // 送信ボタンが明示的にクリックされていない場合は無視
+    if (!submitClicked) {
+      console.log("Form submission blocked - submit button not clicked", { activeStep, submitClicked });
+      return;
+    }
+
+    // 確認画面（step 2）以外からの送信は無視
+    if (activeStep !== steps.length - 1) {
+      console.log("Form submission blocked - not on confirmation step", { activeStep });
+      setSubmitClicked(false);
+      return;
+    }
+
     console.log("Form submitted:", data);
     setIsSubmitting(true);
+    setSubmitClicked(false);
 
     const userID = process.env.NEXT_PUBLIC_USER_ID;
     const serviceID = process.env.NEXT_PUBLIC_SERVICE_ID;
@@ -243,8 +332,8 @@ const ContactPage = () => {
     const returnDateTime = data.returnDate ? moment(data.returnDate).format("YYYY/MM/DD HH:mm") : "";
     const notificationDateStr = data.notificationDate ? moment(data.notificationDate).format("YYYY/MM/DD") : "";
 
-    // 選挙種別ラベル
-    const electionTypeLabel = electionTypes.find(t => t.value === data.electionType)?.label || "";
+    // 選挙種別ラベル（シミュレーションから取得）
+    const electionTypeLabel = electionTypes.find(t => t.value === sendData?.electoralClass)?.label || "";
 
     // 納車・引取場所
     const deliveryLocationMap: { [key: string]: string } = {
@@ -302,16 +391,12 @@ const ContactPage = () => {
       endMapsUrl: generateMapsUrl(pickupAddress || ""),
       note: data.notes,
 
-      // ========== 選挙情報 ==========
+      // ========== 選挙情報（シミュレーションから） ==========
       electoralClass: electionTypeLabel,
-      electionArea: selectedPrefName || "未選択",
-      parliamentClass: data.parliamentType === "chairman" ? "議員" : "首長",
-      notificationDate: notificationDateStr,
-      daysUntilNotification: daysUntilNotification > 0
-        ? `${daysUntilNotification}日後`
-        : daysUntilNotification === 0
-        ? "本日"
-        : `${Math.abs(daysUntilNotification)}日前`,
+      electionArea: prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択",
+      parliamentClass: "",
+      notificationDate: "",
+      daysUntilNotification: "",
 
       // ========== 車両情報（シミュレーションから） ==========
       carClass: CarClassConv(sendData?.carClass || ""),
@@ -457,99 +542,21 @@ const ContactPage = () => {
           ))}
         </Stepper>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Step 1: 選挙情報 */}
+        <form
+          onSubmit={(e) => {
+            // フォームの自動送信を完全に防ぐ（送信は手動でhandleSubmit経由で行う）
+            e.preventDefault();
+            console.log("Form auto-submit blocked");
+          }}
+          onKeyDown={(e) => {
+            // Enterキーによるフォーム送信を防ぐ
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
+        >
+          {/* Step 1: お客様情報 */}
           <Collapse in={activeStep === 0}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <HowToVoteIcon fontSize="small" color="primary" />
-                選挙の種類
-              </Typography>
-              <Grid container spacing={1}>
-                {electionTypes.map((type) => (
-                  <Grid item xs={12} sm={4} key={type.value}>
-                    <Card
-                      variant="outlined"
-                      onClick={() => setValue("electionType", type.value)}
-                      sx={{
-                        cursor: "pointer",
-                        borderColor: electionType === type.value ? "primary.main" : "grey.300",
-                        borderWidth: electionType === type.value ? 2 : 1,
-                        bgcolor: electionType === type.value ? "primary.light" : "white",
-                        transition: "all 0.2s",
-                        "&:hover": { borderColor: "primary.main" },
-                      }}
-                    >
-                      <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                          {type.icon}
-                          <Typography variant="body2" fontWeight="bold">
-                            {type.label}
-                          </Typography>
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                          {type.description}
-                        </Typography>
-                        <Chip
-                          icon={<AccessTimeIcon sx={{ fontSize: 12 }} />}
-                          label={type.timing}
-                          size="small"
-                          sx={{ mt: 0.5, height: 20, "& .MuiChip-label": { px: 0.5, fontSize: "0.6rem" } }}
-                        />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <BusinessIcon fontSize="small" color="primary" />
-                  選挙区を選択
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
-                  地図をタップして選挙区を選んでください
-                </Typography>
-                <JapanMap selectedPref={selectedPref} onSelect={handlePrefSelect} />
-              </Box>
-
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CalendarTodayIcon fontSize="small" color="primary" />
-                  告示日（わかれば）
-                </Typography>
-                <RhfDatePicker
-                  control={control}
-                  errors={errors}
-                  name="notificationDate"
-                  label="告示日"
-                  size="small"
-                />
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
-                  未定の場合は空欄で構いません
-                </Typography>
-              </Box>
-
-              {/* 予約タイミング案内 */}
-              {electionType && (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                  <Typography variant="caption">
-                    <strong>
-                      {electionTypes.find((t) => t.value === electionType)?.label}
-                    </strong>
-                    の場合、
-                    <strong>
-                      {electionTypes.find((t) => t.value === electionType)?.timing}
-                    </strong>
-                    です。早めのご予約をお勧めします。
-                  </Typography>
-                </Alert>
-              )}
-            </Box>
-          </Collapse>
-
-          {/* Step 2: お客様情報 */}
-          <Collapse in={activeStep === 1}>
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <PersonIcon fontSize="small" color="primary" />
@@ -607,7 +614,7 @@ const ContactPage = () => {
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  setZip(field.value);
+                                  setZip(field.value || "");
                                   setZipTarget("personal");
                                 }}
                               >
@@ -691,7 +698,7 @@ const ContactPage = () => {
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  setZip(field.value);
+                                  setZip(field.value || "");
                                   setZipTarget("office");
                                 }}
                               >
@@ -735,8 +742,8 @@ const ContactPage = () => {
             </Box>
           </Collapse>
 
-          {/* Step 3: 納車・引取 */}
-          <Collapse in={activeStep === 2}>
+          {/* Step 2: 納車・引取 */}
+          <Collapse in={activeStep === 1}>
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocalShippingIcon fontSize="small" color="primary" />
@@ -836,6 +843,70 @@ const ContactPage = () => {
                 )}
               </Grid>
 
+              {/* 事務所住所（納車または引取で「選挙事務所」を選択した場合） */}
+              {(deliveryLocation === "office" || returnLocation === "office") && (
+                <>
+                  <Divider sx={{ my: 3 }} />
+                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <BusinessIcon fontSize="small" color="primary" />
+                    選挙事務所の住所
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+                    納車・引取先として選挙事務所を選択したため、住所の入力が必要です
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={5}>
+                      <Controller
+                        name="officePostCode"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label="事務所郵便番号*"
+                            fullWidth
+                            size="small"
+                            placeholder="123-4567"
+                            error={!!errors.officePostCode}
+                            helperText={errors.officePostCode?.message as string}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                      setZip(field.value || "");
+                                      setZipTarget("office");
+                                    }}
+                                  >
+                                    <SearchIcon fontSize="small" />
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={7}>
+                      <Controller
+                        name="officeAddress"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label="事務所住所*"
+                            fullWidth
+                            size="small"
+                            error={!!errors.officeAddress}
+                            helperText={errors.officeAddress?.message as string}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                </>
+              )}
+
               <Box sx={{ mt: 3 }}>
                 <Controller
                   name="notes"
@@ -856,8 +927,8 @@ const ContactPage = () => {
             </Box>
           </Collapse>
 
-          {/* Step 4: 確認 */}
-          <Collapse in={activeStep === 3}>
+          {/* Step 3: 確認 */}
+          <Collapse in={activeStep === 2}>
             <Box sx={{ mb: 3 }}>
               <Alert severity="success" sx={{ mb: 2 }}>
                 <Typography variant="body2">
@@ -966,10 +1037,10 @@ const ContactPage = () => {
                 </Paper>
               )}
 
-              {/* 選挙情報 */}
+              {/* 選挙情報（シミュレーションから） */}
               <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                 <Typography variant="caption" fontWeight="bold" color="primary" gutterBottom sx={{ display: "block" }}>
-                  選挙情報
+                  選挙情報（シミュレーションで選択）
                 </Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={4}>
@@ -977,27 +1048,17 @@ const ContactPage = () => {
                   </Grid>
                   <Grid item xs={8}>
                     <Typography variant="body2">
-                      {electionTypes.find((t) => t.value === electionType)?.label || "未選択"}
+                      {electionTypes.find((t) => t.value === sendData?.electoralClass)?.label || "未選択"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="caption" color="text.secondary">選挙区</Typography>
+                    <Typography variant="caption" color="text.secondary">配送先</Typography>
                   </Grid>
                   <Grid item xs={8}>
-                    <Typography variant="body2">{selectedPrefName || "未選択"}</Typography>
+                    <Typography variant="body2">
+                      {prefCd.find((p) => p.value === sendData?.deliveryPrefecture)?.label || "未選択"}
+                    </Typography>
                   </Grid>
-                  {watch("notificationDate") && (
-                    <>
-                      <Grid item xs={4}>
-                        <Typography variant="caption" color="text.secondary">告示日</Typography>
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant="body2">
-                          {moment(watch("notificationDate")).format("YYYY/MM/DD")}
-                        </Typography>
-                      </Grid>
-                    </>
-                  )}
                 </Grid>
               </Paper>
 
@@ -1244,6 +1305,7 @@ const ContactPage = () => {
           {/* ナビゲーションボタン */}
           <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
             <Button
+              type="button"
               onClick={handleBack}
               disabled={activeStep === 0}
               startIcon={<ArrowBackIcon />}
@@ -1253,11 +1315,22 @@ const ContactPage = () => {
               戻る
             </Button>
             {activeStep < steps.length - 1 ? (
-              <Button onClick={handleNext} endIcon={<ArrowForwardIcon />} variant="contained" size="small">
+              <Button type="button" onClick={handleNext} endIcon={<ArrowForwardIcon />} variant="contained" size="small">
                 次へ
               </Button>
             ) : (
-              <Button type="submit" endIcon={<CheckCircleIcon />} variant="contained" color="success" size="small">
+              <Button
+                type="button"
+                onClick={() => {
+                  setSubmitClicked(true);
+                  // 手動でフォーム送信を実行
+                  handleSubmit(onSubmit)();
+                }}
+                endIcon={<CheckCircleIcon />}
+                variant="contained"
+                color="success"
+                size="small"
+              >
                 送信する
               </Button>
             )}

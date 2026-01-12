@@ -2,19 +2,23 @@ import React, { useMemo } from "react";
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardContent,
   Chip,
+  IconButton,
   Typography,
 } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { ElectoralClass } from "../calc/calcSimlationParts";
 
 interface RecommendedCarProps {
   electoralClass: ElectoralClass;
+  currentCarClass?: "s" | "m" | "l" | "ll";
   onSelect: (carClass: "s" | "m" | "l" | "ll", carType: string) => void;
+  onDismiss?: () => void;
 }
 
 interface Recommendation {
@@ -25,7 +29,12 @@ interface Recommendation {
   tags: string[];
 }
 
-const RecommendedCar: React.FC<RecommendedCarProps> = ({ electoralClass, onSelect }) => {
+const RecommendedCar: React.FC<RecommendedCarProps> = ({
+  electoralClass,
+  currentCarClass,
+  onSelect,
+  onDismiss,
+}) => {
   // 選挙区分に応じたおすすめ車種を計算
   const recommendations: Recommendation[] = useMemo(() => {
     switch (electoralClass) {
@@ -115,60 +124,84 @@ const RecommendedCar: React.FC<RecommendedCarProps> = ({ electoralClass, onSelec
     <Alert
       severity="info"
       icon={<AutoAwesomeIcon />}
+      action={
+        onDismiss && (
+          <IconButton
+            aria-label="閉じる"
+            color="inherit"
+            size="small"
+            onClick={onDismiss}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )
+      }
       sx={{
         "& .MuiAlert-message": { width: "100%" },
       }}
     >
       <Typography variant="subtitle2" gutterBottom>
-        「{electoralLabels[electoralClass]}」におすすめの車種
+        「{electoralLabels[electoralClass]}」におすすめ
       </Typography>
+
+      {/* おすすめ車種カード */}
       <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, mt: 1 }}>
-        {recommendations.map((rec, idx) => (
-          <Card
-            key={idx}
-            variant="outlined"
-            sx={{
-              flex: { xs: "1 1 auto", sm: "1 1 0" },
-              cursor: "pointer",
-              transition: "all 0.2s",
-              "&:hover": {
-                borderColor: "primary.main",
-                boxShadow: 1,
-              },
-            }}
-            onClick={() => onSelect(rec.carClass, rec.carType)}
-          >
-            <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
-                <DirectionsCarIcon fontSize="small" color="primary" />
-                <Typography variant="body2" fontWeight="bold" sx={{ fontSize: { xs: "0.875rem", sm: "0.875rem" } }}>
-                  {rec.carName}
-                </Typography>
-                <Chip
-                  label={rec.carClass.toUpperCase() + "クラス"}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                  sx={{ height: 20, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
-                />
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, lineHeight: 1.4 }}>
-                {rec.reason}
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                {rec.tags.map((tag, tagIdx) => (
+        {recommendations.map((rec, idx) => {
+          const isSelected = currentCarClass === rec.carClass;
+          return (
+            <Card
+              key={idx}
+              variant="outlined"
+              sx={{
+                flex: { xs: "1 1 auto", sm: "1 1 0" },
+                cursor: "pointer",
+                transition: "all 0.2s",
+                borderColor: isSelected ? "primary.main" : undefined,
+                borderWidth: isSelected ? 2 : 1,
+                bgcolor: isSelected ? "primary.light" : "white",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  borderWidth: 2,
+                },
+              }}
+              onClick={() => onSelect(rec.carClass, rec.carType)}
+            >
+              <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
+                  {isSelected ? (
+                    <CheckCircleIcon fontSize="small" color="primary" />
+                  ) : (
+                    <DirectionsCarIcon fontSize="small" color="primary" />
+                  )}
+                  <Typography variant="body2" fontWeight="bold">
+                    {rec.carName}
+                  </Typography>
                   <Chip
-                    key={tagIdx}
-                    label={tag}
+                    label={rec.carClass.toUpperCase() + "クラス"}
                     size="small"
-                    color={tagIdx === 0 ? "success" : "default"}
-                    sx={{ height: 22, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
+                    color="primary"
+                    variant={isSelected ? "filled" : "outlined"}
+                    sx={{ height: 20, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
                   />
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, lineHeight: 1.4 }}>
+                  {rec.reason}
+                </Typography>
+                <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                  {rec.tags.map((tag, tagIdx) => (
+                    <Chip
+                      key={tagIdx}
+                      label={tag}
+                      size="small"
+                      color={tagIdx === 0 ? "success" : "default"}
+                      sx={{ height: 22, "& .MuiChip-label": { px: 1, fontSize: "0.7rem" } }}
+                    />
+                  ))}
+                </Box>
+              </CardContent>
+            </Card>
+          );
+        })}
       </Box>
     </Alert>
   );

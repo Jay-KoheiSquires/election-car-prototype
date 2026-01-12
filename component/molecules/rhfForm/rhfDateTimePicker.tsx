@@ -80,7 +80,19 @@ const RhfDateTimePicker = ({
                 helperText={errors[name]?.message}
               />
             )}
-            DialogProps={{ sx: styles.mobiledialogprops }} // スマホ画面の左上 選択中日付表示 文字の大きさ調整
+            DialogProps={{
+              sx: styles.mobiledialogprops,
+              // ダイアログ内のボタンがフォーム送信を引き起こさないようにする
+              onClose: (event: any) => {
+                event?.stopPropagation?.();
+              },
+            }}
+            // アクションボタンにtype="button"を設定してフォーム送信を防ぐ
+            componentsProps={{
+              actionBar: {
+                actions: ['cancel', 'accept'],
+              },
+            }}
           />
         </LocalizationProvider>
       )}

@@ -15,24 +15,13 @@ test.describe("UI Screenshots", () => {
     await page.waitForTimeout(500);
     await page.screenshot({ path: "screenshots/02_simulation_m_class.png", fullPage: true });
 
-    // 2. お問合せページ - ステップ1
+    // 2. お問合せページ - ステップ1（お客様情報）
+    // ※選挙情報はシミュレーションで入力済み
     await page.goto("/contact");
     await page.waitForTimeout(1000);
     await page.screenshot({ path: "screenshots/03_contact_step1.png", fullPage: true });
 
-    // 選挙種類選択後
-    await page.locator("text=統一地方選挙").first().click();
-    await page.waitForTimeout(300);
-    await page.locator("text=東京").first().click();
-    await page.waitForTimeout(300);
-    await page.screenshot({ path: "screenshots/04_contact_step1_selected.png", fullPage: true });
-
-    // ステップ2へ
-    await page.locator("button:has-text('次へ')").click();
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: "screenshots/05_contact_step2.png", fullPage: true });
-
-    // ステップ2入力後
+    // ステップ1入力
     await page.getByLabel(/お名前/).fill("テスト太郎");
     await page.getByLabel(/フリガナ/).fill("テストタロウ");
     await page.getByLabel(/郵便番号/).first().fill("100-0001");
@@ -43,17 +32,17 @@ test.describe("UI Screenshots", () => {
     await page.getByLabel(/事務所住所/).fill("東京都千代田区皇居外苑2-2");
     await page.getByLabel(/事務所電話番号/).fill("03-1234-5678");
     await page.getByLabel(/ご担当者名/).fill("選挙 責任者");
-    await page.screenshot({ path: "screenshots/06_contact_step2_filled.png", fullPage: true });
+    await page.screenshot({ path: "screenshots/04_contact_step1_filled.png", fullPage: true });
 
-    // ステップ3へ
+    // ステップ2へ（納車・引取）
     await page.locator("button:has-text('次へ')").click();
     await page.waitForTimeout(500);
-    await page.screenshot({ path: "screenshots/07_contact_step3.png", fullPage: true });
+    await page.screenshot({ path: "screenshots/05_contact_step2.png", fullPage: true });
 
-    // ステップ4へ（確認画面）
+    // ステップ3へ（確認画面）
     await page.locator("button:has-text('次へ')").click();
     await page.waitForTimeout(500);
-    await page.screenshot({ path: "screenshots/08_contact_step4_confirm.png", fullPage: true });
+    await page.screenshot({ path: "screenshots/06_contact_step3_confirm.png", fullPage: true });
 
     // 3. FAQページ
     await page.goto("/faq");

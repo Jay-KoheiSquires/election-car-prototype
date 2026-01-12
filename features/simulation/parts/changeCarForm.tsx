@@ -3,7 +3,7 @@
  * ライト区分、アンプサイズ、スピーカーなどの設定UI
  */
 import React, { memo } from "react";
-import { Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { RhfRadioButton } from "../../../component/molecules/rhfForm";
 import { SignalLightForm, SwitchSignalLightForm } from "../forms/SignalLightForms";
 import { UnitPriceType } from "../../api/type";
@@ -98,11 +98,6 @@ export const ChangeCarForm = ({
           </Grid>
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <Typography variant={"h6"} textAlign={"right"} fontStyle={"italic"}>
-            {`小計 ¥ ${calcValue?.subTotalPrice.toLocaleString()}（税込）`}
-          </Typography>
-        </Grid>
       </Grid>
     </Grid>
   );

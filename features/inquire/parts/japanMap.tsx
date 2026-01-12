@@ -128,8 +128,8 @@ const mapPositions: { [key: string]: { row: number; col: number } } = {
   "44": { row: 9, col: 1 }, // 大分（調整）
   "45": { row: 11, col: 1 }, // 宮崎
   "46": { row: 12, col: 0 }, // 鹿児島
-  // 沖縄
-  "47": { row: 13, col: 0 }, // 沖縄
+  // 沖縄（左側に配置）
+  "47": { row: 11, col: -1 }, // 沖縄
 };
 
 // 大分の位置を修正（山口と被るため）
@@ -138,7 +138,7 @@ mapPositions["44"] = { row: 10, col: 0.5 };
 const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [tabValue, setTabValue] = useState(isMobile ? 1 : 0); // モバイルはリスト(1)、PCは地図(0)
+  const [tabValue, setTabValue] = useState(0); // デフォルトはリスト(0)
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   const getRegionColor = (prefCode: string) => {
@@ -163,17 +163,25 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
 
   // 地図UIコンポーネント
   const MapUI = () => (
-    <Box sx={{ position: "relative", width: "100%", pt: 1 }}>
+    <Box
+      sx={{
+        position: "relative",
+        width: "100%",
+        p: 3,
+        bgcolor: "grey.100",
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "grey.300",
+      }}
+    >
       {/* グリッドベースの地図 */}
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(10, 1fr)",
-          gridTemplateRows: "repeat(14, 1fr)",
+          gridTemplateColumns: "auto repeat(10, 1fr)",
+          gridTemplateRows: "repeat(13, minmax(24px, 1fr))",
           gap: 0.3,
-          aspectRatio: { xs: "10/10", sm: "10/14" },
-          maxWidth: 350,
-          maxHeight: { xs: 200, sm: 350 },
+          maxWidth: 420,
           mx: "auto",
         }}
       >
@@ -183,33 +191,43 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
           const isSelected = selectedPref === pref.code;
           const regionColor = getRegionColor(pref.code);
 
+          // 3文字以上の県名は短縮
+          const displayName = pref.name.replace(/県|府|都|道/, "");
+          const shortName = displayName.length > 2 ? displayName.slice(0, 2) : displayName;
+
+          // 列を+2にシフト（左に1列追加したため）
+          const gridCol = Math.floor(pos.col) + 2;
+
           return (
             <Box
               key={pref.code}
               onClick={() => handlePrefClick(pref.code, pref.name)}
+              title={pref.name} // ツールチップで正式名を表示
               sx={{
-                gridColumn: Math.floor(pos.col) + 1,
+                gridColumn: gridCol,
                 gridRow: pos.row + 1,
                 bgcolor: isSelected ? "primary.main" : regionColor,
                 color: "white",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: { xs: "0.6rem", sm: "0.7rem" },
+                fontSize: { xs: "0.55rem", sm: "0.65rem" },
                 fontWeight: "bold",
                 borderRadius: 0.5,
                 cursor: "pointer",
                 transition: "all 0.2s",
                 border: isSelected ? "2px solid #000" : "1px solid rgba(255,255,255,0.3)",
                 "&:hover": {
-                  transform: "scale(1.1)",
+                  transform: "scale(1.15)",
                   zIndex: 10,
                   boxShadow: 2,
                 },
-                minHeight: { xs: 18, sm: 24 },
+                minHeight: { xs: 22, sm: 28 },
+                minWidth: { xs: 22, sm: 28 },
+                p: 0.25,
               }}
             >
-              {pref.name.replace(/県|府|都|道/, "")}
+              {shortName}
             </Box>
           );
         })}
@@ -362,21 +380,21 @@ const JapanMap: React.FC<JapanMapProps> = ({ selectedPref, onSelect }) => {
         variant="fullWidth"
       >
         <Tab
-          icon={<MapIcon sx={{ fontSize: 16 }} />}
-          iconPosition="start"
-          label="地図から選択"
-          sx={{ minHeight: 36, fontSize: "0.75rem", py: 0.5 }}
-        />
-        <Tab
           icon={<ListIcon sx={{ fontSize: 16 }} />}
           iconPosition="start"
           label="リストから選択"
           sx={{ minHeight: 36, fontSize: "0.75rem", py: 0.5 }}
         />
+        <Tab
+          icon={<MapIcon sx={{ fontSize: 16 }} />}
+          iconPosition="start"
+          label="地図から選択"
+          sx={{ minHeight: 36, fontSize: "0.75rem", py: 0.5 }}
+        />
       </Tabs>
 
       {/* タブコンテンツ */}
-      {tabValue === 0 ? <MapUI /> : <ListUI />}
+      {tabValue === 0 ? <ListUI /> : <MapUI />}
     </Box>
   );
 };
